@@ -23,23 +23,135 @@
 #cancel{background:#fff;color:#344e67;border:1px solid #b8c8d7;padding:13px 20px}
 #message.ok{color:#176b51;font-weight:700}
 @media(max-width:600px){#editor{padding:14px}.form-block{padding:14px}.form-columns{grid-template-columns:1fr}#save{min-width:0;width:100%}}
+
+/* V1.1 — centro de operaciones */
+main{max-width:1500px;padding:24px 32px}
+#login{max-width:520px;margin:35px auto;padding:28px}
+#message:empty{display:none}
+#app{display:grid;grid-template-columns:230px minmax(0,1fr);gap:24px;align-items:start}
+#sidebar{position:sticky;top:18px;background:#fff;border:1px solid #dce4eb;border-radius:16px;padding:18px;box-shadow:0 4px 18px #10243a08}
+#sidebar h3{font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:#62788d;margin:8px 0 14px}
+#nav{display:flex;flex-direction:column;gap:7px;margin:0}
+#nav button{display:flex;align-items:center;justify-content:space-between;text-align:left;padding:12px 13px;background:#f2f6fa;color:#344e67}
+#nav button.active{background:#176b51;color:#fff}
+#nav button span{font-size:12px;border-radius:12px;padding:2px 7px;background:#10243a12}
+#sidebar .side-note{border-top:1px solid #dce4eb;margin-top:22px;padding-top:15px;line-height:1.5}
+#workspace{min-width:0}
+.dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+.dashboard-head h2{font-size:27px;margin:0 0 5px}
+.dashboard-head p{margin:0;color:#62788d;font-size:14px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 20px}
+.stats>div{min-width:0;border:1px solid #dce4eb;box-shadow:0 3px 12px #10243a05}
+.stats strong{font-size:30px}
+.stats>div span{font-size:14px}
+.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.toolbar .actions{margin:0}
+.toolbar #search{flex:1;min-width:180px;margin:0;background:white}
+.view-switch{display:flex;gap:5px}
+.view-switch button{background:#fff;color:#344e67;border:1px solid #c4d2df}
+.view-switch button.active{background:#344e67;color:white}
+.list-heading{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:22px 0 14px}
+.list-heading h2{margin:0;font-size:22px}
+#cards.grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));align-items:start}
+#cards.list{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+article{min-width:0;box-shadow:0 3px 12px #10243a06}
+article h3{font-size:20px;margin:8px 0}
+article p{font-size:15px;line-height:1.55;margin:12px 0}
+article .meta{display:flex;gap:8px;flex-wrap:wrap;align-items:center;font-size:12px;color:#52667b}
+article .tag{display:inline-block;background:#edf3f8;border-radius:20px;padding:4px 9px;font-weight:600}
+article .priority-Alta{background:#fff0e8;color:#9d411b}
+article .priority-Media{background:#fff7d7;color:#785a00}
+article .priority-Baja{background:#eaf6ea;color:#276c45}
+article .progress-row{display:flex;align-items:center;gap:12px;margin-top:15px}
+article .progress-row progress{flex:1}
+article .progress-row strong{font-size:14px}
+article .field{padding:10px 12px;border-radius:8px;margin:10px 0;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.5}
+article .field strong{display:block;font-size:12px;margin-bottom:4px}
+article .last{background:#eaf8ea;border-left:3px solid #4caf50}
+article .next{background:#fff8d9;border-left:3px solid #e6b800}
+article .description{background:#eaf6ff;border-left:3px solid #4a90e2}
+article .related{border-top:1px solid #dce4eb;margin-top:16px;padding-top:12px}
+article .related summary,article details summary{cursor:pointer;font-weight:600;color:#344e67}
+article .related-row{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #edf1f5}
+article .related-row button{font-size:12px;padding:7px 9px;flex-shrink:0}
+article .actions{gap:8px;margin:16px 0 12px}
+article .actions button{font-size:13px}
+article .images{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+article .images img{max-height:140px;max-width:100%;object-fit:contain}
+#cards.list article .description{margin-top:8px}
+#advanceDialog{border:1px solid #dce4eb;border-radius:16px;padding:25px;width:min(92vw,600px);color:#18334a;box-shadow:0 14px 70px #10243a40}
+#advanceDialog::backdrop{background:#10243a80}
+#advanceDialog textarea[name=last_step]{background:#eaf8ea;border-color:#8fc49b}
+#advanceDialog textarea[name=next_step]{background:#fff8d9;border-color:#dfc66f}
+#advanceDialog .actions{justify-content:center}
+#advanceDialog label{display:block}
+button:disabled{opacity:.55;cursor:not-allowed}
+@media(max-width:900px){main{padding:18px}#app{grid-template-columns:1fr;gap:14px}#sidebar{position:static;padding:12px}#nav{flex-direction:row;flex-wrap:wrap}#nav button{flex:1;min-width:125px}#sidebar h3,#sidebar .side-note{display:none}}
+@media(max-width:550px){header{padding:18px}header h1{font-size:23px}main{padding:12px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats>div{padding:13px}.toolbar{align-items:stretch}.toolbar #search{flex-basis:100%}.dashboard-head h2{font-size:23px}.view-switch{width:100%}.view-switch button{flex:1}}
 </style>
-<header><div><h1>BITÁCORA <b>XPRO HUB</b></h1>Ideas · Proyectos · Acción · V1.1 (formulario)</div><button id="logout" hidden>Cerrar sesión</button></header><main><p id="message" role="status"></p><section id="login"><h2>Acceso personal</h2><p>De una idea a una realidad.</p><form id="loginForm"><label>Correo<input type="email" id="email" required autocomplete="username"></label><label>Contraseña<input type="password" id="password" required autocomplete="current-password"></label><button>Ingresar</button></form></section><div id="app" hidden><div class="stats" id="stats"></div><nav id="nav"></nav><div class="actions"><button id="new">+ Nuevo registro</button><button id="backup" class="secondary">Exportar datos JSON</button></div><input id="search" placeholder="Buscar en tus ideas, proyectos y pendientes…"><section id="editor" hidden><h2 id="editorTitle">Nuevo registro</h2><p class="form-intro">Organiza tus ideas, avances y próximos pasos en un solo lugar.</p><form id="form">
+<header><div><h1>BITÁCORA <b>XPRO HUB</b></h1>Ideas · Proyectos · Acción · V1.1 · Centro de operaciones</div><button id="logout" hidden>Cerrar sesión</button></header><main><p id="message" role="status"></p><section id="login"><h2>Acceso personal</h2><p>De una idea a una realidad.</p><form id="loginForm"><label>Correo<input type="email" id="email" required autocomplete="username"></label><label>Contraseña<input type="password" id="password" required autocomplete="current-password"></label><button>Ingresar</button></form></section><div id="app" hidden><aside id="sidebar"><h3>Mi espacio personal</h3><nav id="nav" aria-label="Navegación principal"></nav><div class="side-note"><small>BITÁCORA XPRO HUB<br>V1.1 · Acceso personal</small></div></aside><div id="workspace"><div class="dashboard-head"><div><h2>Mi centro de operaciones</h2><p id="today"></p></div><button id="new">＋ Nuevo registro</button></div><div class="stats" id="stats"></div><div class="toolbar"><input id="search" placeholder="Buscar en tus ideas, proyectos y pendientes…" aria-label="Buscar registros"><button id="backup" class="secondary">Exportar JSON</button><div class="view-switch"><button id="listView" type="button" aria-pressed="true">☰ Lista</button><button id="gridView" type="button" aria-pressed="false">▦ Tarjetas</button></div></div><section id="editor" hidden><h2 id="editorTitle">Nuevo registro</h2><p class="form-intro">Organiza tus ideas, avances y próximos pasos en un solo lugar.</p><form id="form">
 <div class="form-block"><h3>01 · Datos generales</h3><label>Tipo<select name="kind"><option>Proyecto</option><option>Idea</option><option>Pendiente</option></select></label><label>Título<input name="title" required maxlength="200" placeholder="Nombre del proyecto, idea o pendiente"></label><label>Descripción<textarea name="description" placeholder="Describe el objetivo y alcance del registro…"></textarea></label></div>
 <div class="form-block control"><h3>02 · Planificación y control</h3><label>Proyecto relacionado<select name="parent_id" id="parents"></select></label><div class="form-columns"><label>Estado<select name="status"><option>Por iniciar</option><option>En desarrollo</option><option>En pausa</option><option>Finalizado</option></select></label><label>Prioridad<select name="priority"><option>Media</option><option>Alta</option><option>Baja</option></select></label><label>Avance (%)<input name="progress" type="number" min="0" max="100" value="0" required></label><label>Fecha límite<input name="due" type="date"></label></div></div>
 <div class="form-block follow"><h3>03 · Seguimiento del proyecto</h3><label>Último avance<textarea name="last_step" placeholder="¿Qué fue lo último que realizaste?"></textarea></label><label>Próxima acción<textarea name="next_step" placeholder="¿Cuál es el siguiente paso concreto?"></textarea></label></div>
 <div class="form-block resources"><h3>04 · Recursos adjuntos</h3><label>Enlaces y videos (uno por línea)<textarea name="links" placeholder="https://…"></textarea></label><label>Agregar imagen privada (máx. 5 MB)<input id="image" type="file" accept="image/jpeg,image/png,image/webp,image/gif"></label><small>Formatos: JPG, PNG, WEBP o GIF. La imagen se guardará junto con el registro.</small></div>
-<div class="form-footer"><small>Se guardarán todos los datos y recursos del registro.</small><div class="actions"><button id="save" type="submit">✓ Guardar registro</button><button type="button" class="secondary" id="cancel">Cancelar</button></div></div></form></section><h2 id="heading">¿Dónde me quedé?</h2><div id="cards" class="grid"></div></div></main>
+<div class="form-footer"><small>Se guardarán todos los datos y recursos del registro.</small><div class="actions"><button id="save" type="submit">✓ Guardar registro</button><button type="button" class="secondary" id="cancel">Cancelar</button></div></div></form></section><div class="list-heading"><h2 id="heading">¿Dónde me quedé?</h2><small id="resultCount"></small></div><div id="cards" class="list"></div></div></div><dialog id="advanceDialog"><h2>Registrar avance</h2><p id="advanceTitle"></p><form id="advanceForm"><label>Avance (%)<input type="number" name="progress" min="0" max="100" required></label><label>Último avance<textarea name="last_step" required placeholder="¿Qué realizaste hoy?"></textarea></label><label>Próxima acción<textarea name="next_step" placeholder="¿Qué sigue?"></textarea></label><div class="actions"><button id="advanceSave" type="submit">✓ Guardar avance</button><button id="advanceCancel" type="button" class="secondary">Cancelar</button></div></form></dialog></main>
 <script type="module">
 import {createClient} from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
 const URL='https://gibgjphsxoyozlaagglt.supabase.co', KEY='sb_publishable_rYFJrkDFvZbssJ_onkGZnA_41vaRffR';
 const $=id=>document.getElementById(id);const msg=(t,ok=false)=>{$('message').textContent=t;$('message').classList.toggle('ok',ok)};let db,user,items=[],tab='Inicio',editing=null,epoch=0;const f=$('form');
 function el(tag,text,cls){const n=document.createElement(tag);if(text!=null)n.textContent=text;if(cls)n.className=cls;return n}function btn(t,fn,cls){let b=el('button',t,cls);b.type='button';b.onclick=fn;return b}function add(p,...nodes){p.append(...nodes)}function safeLink(s){try{let u=new globalThis.URL(s);return ['https:','http:'].includes(u.protocol)?u.href:null}catch{return null}}
 function fail(e){msg(e?.message||String(e))}async function load(){const {data,error}=await db.from('entries').select('*').order('updated_at',{ascending:false});if(error)throw error;items=data;render()}
-function render(){let stamp=++epoch;$('stats').replaceChildren();for(let [label,n] of [['Proyectos',items.filter(x=>x.kind==='Proyecto').length],['Ideas',items.filter(x=>x.kind==='Idea').length],['Pendientes',items.filter(x=>x.kind==='Pendiente'&&x.status!=='Finalizado').length],['Finalizados',items.filter(x=>x.status==='Finalizado').length]]){let d=el('div');add(d,el('strong',n),el('span',label));$('stats').append(d)}$('nav').replaceChildren(...['Inicio','Proyecto','Idea','Pendiente','Finalizado'].map(t=>btn(({Proyecto:'Proyectos',Idea:'Ideas',Pendiente:'Pendientes',Finalizado:'Finalizados'})[t]||t,()=>{tab=t;render()},t===tab?'':'secondary')));let q=$('search').value.toLowerCase();let list=items.filter(x=>(tab==='Inicio'||x.kind===tab||tab==='Finalizado'&&x.status===tab)&&JSON.stringify(x).toLowerCase().includes(q));$('heading').textContent=tab==='Inicio'?'¿Dónde me quedé?':tab;$('cards').replaceChildren();if(!list.length)$('cards').append(el('p','No hay registros todavía. Crea el primero.'));for(let x of list){let a=el('article');add(a,el('small',x.kind+' · '+x.status+' · Prioridad '+x.priority),el('h3',x.title),el('p',x.description));let pr=el('progress');pr.max=100;pr.value=x.progress;add(a,pr,el('small',x.progress+'% · Actualizado '+new Date(x.updated_at).toLocaleString('es-PE')));if(x.due)add(a,el('p','Fecha límite: '+x.due.split('-').reverse().join('/')));let parent=items.find(i=>i.id===x.parent_id);if(parent)add(a,el('small','Proyecto: '+parent.title));add(a,el('p','Último avance: '+(x.last_step||'Sin registrar')),el('p','Próxima acción: '+(x.next_step||'Sin registrar')));for(let s of (x.links||'').split('\n')){let u=safeLink(s.trim());if(u){let link=el('a',s);link.href=u;link.target='_blank';link.rel='noopener noreferrer';add(a,link,el('div'))}}for(let path of x.images||[]){db.storage.from('private-images').createSignedUrl(path,300).then(({data})=>{if(data&&stamp===epoch){let im=el('img');im.src=data.signedUrl;im.alt='Imagen adjunta';a.append(im)}})}let actions=el('div',null,'actions');add(actions,btn('Editar',()=>edit(x)),btn('Finalizar',async()=>{try{let {error}=await db.from('entries').update({status:'Finalizado',progress:100}).eq('id',x.id);if(error)throw error;await load()}catch(e){fail(e)}},'secondary'),btn('Eliminar',async()=>{if(!confirm('¿Eliminar este registro?'))return;try{let {error}=await db.from('entries').delete().eq('id',x.id);if(error)throw error;if(x.images?.length){let r=await db.storage.from('private-images').remove(x.images);if(r.error)fail(r.error)}await load()}catch(e){fail(e)}},'danger'));add(a,actions);if(x.history?.length){let d=el('details');add(d,el('summary','Bitácora de avances'));for(let h of [...x.history].reverse())add(d,el('p',new Date(h.date).toLocaleString('es-PE')+' — '+h.text));a.append(d)}$('cards').append(a)}}
-function edit(x){editing=x||null;f.reset();$('parents').replaceChildren(new Option('Sin proyecto',''),...items.filter(i=>i.kind==='Proyecto'&&i.id!==x?.id).map(i=>new Option(i.title,i.id)));if(x)for(let k of ['kind','title','description','parent_id','status','priority','progress','due','last_step','next_step','links'])f.elements[k].value=x[k]??'';else if(['Proyecto','Idea','Pendiente'].includes(tab))f.elements.kind.value=tab;$('editor').hidden=false;$('editorTitle').textContent=x?'Editar registro':'Nuevo registro';$('save').textContent=x?'✓ Guardar cambios':'✓ Guardar registro';$('editor').scrollIntoView({behavior:'smooth'})}
+
+let view='list',advanceItem=null,advanceBusy=false,relatedFilter=null;
+const labels={Inicio:'Inicio',Proyecto:'Proyectos',Idea:'Ideas',Pendiente:'Pendientes',Finalizado:'Finalizados'};
+const icons={Inicio:'⌂',Proyecto:'▣',Idea:'✦',Pendiente:'✓',Finalizado:'◉'};
+function go(t){tab=t;relatedFilter=null;$('search').value='';render()}
+function dateText(v){return v?v.split('-').reverse().join('/'):''}
+function daysAgo(v){const n=Math.max(0,Math.floor((Date.now()-new Date(v).getTime())/86400000));return n===0?'Hoy':n===1?'Hace 1 día':'Hace '+n+' días'}
+function field(a,label,value,cls){let d=el('div',null,'field '+cls);add(d,el('strong',label),document.createTextNode(value||'Sin registrar'));a.append(d)}
+function active(x){return x.status!=='Finalizado'}
+function render(){
+ let stamp=++epoch;let q=$('search').value.trim().toLowerCase();let count=t=>items.filter(x=>t==='Finalizado'?x.status===t:x.kind===t&&active(x)).length;
+ $('today').textContent=new Date().toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ $('stats').replaceChildren();for(let t of ['Proyecto','Idea','Pendiente','Finalizado']){let d=el('div');add(d,el('strong',count(t)),el('span',labels[t]));$('stats').append(d)}
+ $('nav').replaceChildren(...Object.keys(labels).map(t=>{let b=btn(icons[t]+'  '+labels[t],()=>go(t),t===tab?'active':'');b.setAttribute('aria-current',t===tab?'page':'false');if(t!=='Inicio')b.append(el('span',count(t)));return b}));
+ let matches=x=>JSON.stringify(x).toLowerCase().includes(q);
+ let list=items.filter(x=>{if(!matches(x))return false;if(relatedFilter)return x.parent_id===relatedFilter&&x.kind===tab;if(tab==='Inicio')return active(x)&&(q||!x.parent_id||!items.some(p=>p.id===x.parent_id&&active(p)));if(tab==='Finalizado')return !active(x);return active(x)&&x.kind===tab});
+ $('heading').textContent=relatedFilter?labels[tab]+' · '+(items.find(x=>x.id===relatedFilter)?.title||'Proyecto'):tab==='Inicio'?'¿Dónde me quedé?':labels[tab];
+ $('resultCount').textContent=list.length+' '+(list.length===1?'registro':'registros');
+ $('cards').className=view==='list'?'list':'grid';for(let [id,v] of [['listView','list'],['gridView','grid']]){$(id).classList.toggle('active',view===v);$(id).setAttribute('aria-pressed',String(view===v))}
+ $('cards').replaceChildren();if(!list.length)$('cards').append(el('p','No hay registros en esta vista.'));
+ for(let x of list){
+  let a=el('article'),meta=el('div',null,'meta');add(meta,el('span',x.kind,'tag'),el('span',x.status,'tag'),el('span','Prioridad '+x.priority,'tag priority-'+x.priority));add(a,meta,el('h3',x.title));
+  if(x.description)field(a,'Descripción',x.description,'description');
+  let pr=el('progress');pr.max=100;pr.value=x.progress;let prow=el('div',null,'progress-row');add(prow,pr,el('strong',x.progress+'%'));add(a,prow,el('small','Última actividad: '+daysAgo(x.updated_at)+' · '+new Date(x.updated_at).toLocaleString('es-PE')));
+  if(x.due)add(a,el('p','Fecha límite: '+dateText(x.due)));
+  let parent=items.find(i=>i.id===x.parent_id);if(parent)add(a,el('small','Proyecto: '+parent.title));
+  field(a,'Último avance',x.last_step,'last');field(a,'Próxima acción',x.next_step,'next');
+  for(let line of (x.links||'').split('\n')){let u=safeLink(line.trim());if(u){let link=el('a',line);link.href=u;link.target='_blank';link.rel='noopener noreferrer';add(a,link,el('div'))}}
+  let actions=el('div',null,'actions');if(active(x))actions.append(btn('＋ Registrar avance',()=>openAdvance(x)));add(actions,btn('Editar',()=>edit(x),'secondary'));
+  if(active(x))actions.append(btn('Finalizar',async()=>{if(!confirm('¿Marcar este registro como finalizado?'))return;try{let {error}=await db.from('entries').update({status:'Finalizado',progress:100}).eq('id',x.id);if(error)throw error;await load();msg('🟢 OK — Registro finalizado.',true)}catch(e){fail(e)}},'secondary'));
+  actions.append(btn('Eliminar',async()=>{if(!confirm('¿Eliminar este registro? Sus registros relacionados quedarán sin proyecto.'))return;try{let {error}=await db.from('entries').delete().eq('id',x.id);if(error)throw error;if(x.images?.length){let r=await db.storage.from('private-images').remove(x.images);if(r.error){await load();fail(r.error);return}}await load();msg('🟢 OK — Registro eliminado.',true)}catch(e){fail(e)}},'danger'));add(a,actions);
+  if(x.kind==='Proyecto'){
+   let children=items.filter(i=>i.parent_id===x.id);let d=el('details',null,'related');let ni=children.filter(i=>i.kind==='Idea').length,np=children.filter(i=>i.kind==='Pendiente').length,npr=children.filter(i=>i.kind==='Proyecto').length;add(d,el('summary',ni+' ideas · '+np+' pendientes'+(npr?' · '+npr+' subproyectos':'')));
+   if(!children.length)d.append(el('p','Aún no hay registros relacionados.'));
+   for(let child of children){let row=el('div',null,'related-row');add(row,el('span',child.kind+' · '+child.title+' ('+child.status+')'),btn('Editar',()=>edit(child),'secondary'));d.append(row)}
+   let ra=el('div',null,'actions');add(ra,btn('+ Idea',()=>newRelated(x,'Idea'),'secondary'),btn('+ Pendiente',()=>newRelated(x,'Pendiente'),'secondary'));d.append(ra);a.append(d)
+  }
+  if(x.history?.length){let d=el('details');add(d,el('summary','Bitácora de avances ('+x.history.length+')'));for(let h of [...x.history].reverse())add(d,el('p',new Date(h.date).toLocaleString('es-PE')+' — '+h.text));a.append(d)}
+  if(x.images?.length){let gallery=el('div',null,'images');a.append(gallery);for(let path of x.images)db.storage.from('private-images').createSignedUrl(path,300).then(({data})=>{if(data&&stamp===epoch){let im=el('img');im.src=data.signedUrl;im.alt='Imagen adjunta';gallery.append(im)}})}
+  $('cards').append(a)
+ }
+}
+function newRelated(x,kind){edit();f.elements.kind.value=kind;f.elements.parent_id.value=x.id}
+function openAdvance(x){advanceItem=x;let af=$('advanceForm');af.reset();af.elements.progress.value=x.progress;af.elements.next_step.value=x.next_step||'';$('advanceTitle').textContent=x.title;$('advanceDialog').showModal()}
+$('advanceCancel').onclick=()=>{if(!advanceBusy)$('advanceDialog').close()};
+$('advanceDialog').addEventListener('cancel',e=>{if(advanceBusy)e.preventDefault()});
+$('advanceForm').onsubmit=async e=>{e.preventDefault();if(advanceBusy||!advanceItem)return;let x=advanceItem,af=e.currentTarget,v=Object.fromEntries(new FormData(af));if(!v.last_step.trim()){af.elements.last_step.focus();return}advanceBusy=true;$('advanceSave').disabled=true;try{let history=[...(x.history||[]),{date:new Date().toISOString(),text:v.last_step.trim()}];let {data,error}=await db.from('entries').update({progress:Number(v.progress),last_step:v.last_step.trim(),next_step:v.next_step,history,status:x.status==='Por iniciar'?'En desarrollo':x.status}).eq('id',x.id).eq('updated_at',x.updated_at).select('id');if(error)throw error;if(!data?.length)throw Error('El registro cambió. Cierra y vuelve a abrir el avance.');$('advanceDialog').close();await load();msg('🟢 OK — Avance registrado correctamente.',true)}catch(err){fail(err);alert(err.message||String(err))}finally{advanceBusy=false;$('advanceSave').disabled=false}};
+$('listView').onclick=()=>{view='list';render()};$('gridView').onclick=()=>{view='grid';render()};
+function edit(x){if($('save').disabled)return;editing=x||null;f.reset();$('parents').replaceChildren(new Option('Sin proyecto',''),...items.filter(i=>i.kind==='Proyecto'&&i.id!==x?.id).map(i=>new Option(i.title,i.id)));if(x)for(let k of ['kind','title','description','parent_id','status','priority','progress','due','last_step','next_step','links'])f.elements[k].value=x[k]??'';else if(['Proyecto','Idea','Pendiente'].includes(tab))f.elements.kind.value=tab;$('editor').hidden=false;$('editorTitle').textContent=x?'Editar registro':'Nuevo registro';$('save').textContent=x?'✓ Guardar cambios':'✓ Guardar registro';$('editor').scrollIntoView({behavior:'smooth'})}
 $('new').onclick=()=>edit();$('cancel').onclick=()=>{$('editor').hidden=true};$('search').oninput=render;f.onsubmit=async e=>{e.preventDefault();$('save').disabled=true;let uploaded=null;try{let v=Object.fromEntries(new FormData(f));v.progress=Number(v.progress);v.due=v.due||null;v.parent_id=v.parent_id||null;v.owner=user.id;v.images=[...(editing?.images||[])];v.history=[...(editing?.history||[])];if(v.last_step&&v.last_step!==editing?.last_step)v.history.push({date:new Date().toISOString(),text:v.last_step});let file=$('image').files[0];if(file){if(file.size>5*1024*1024||!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type))throw Error('Imagen no válida o mayor a 5 MB');uploaded=user.id+'/'+crypto.randomUUID();let {error}=await db.storage.from('private-images').upload(uploaded,file,{contentType:file.type});if(error)throw error;v.images.push(uploaded)}let r=editing?await db.from('entries').update(v).eq('id',editing.id):await db.from('entries').insert(v);if(r.error)throw r.error;uploaded=null;$('editor').hidden=true;await load();msg('🟢 OK — Registro guardado correctamente.',true)}catch(e){if(uploaded)await db.storage.from('private-images').remove([uploaded]);fail(e)}finally{$('save').disabled=false}};
 $('backup').onclick=()=>{let url=globalThis.URL.createObjectURL(new Blob([JSON.stringify(items,null,2)],{type:'application/json'}));let a=el('a');a.href=url;a.download='bitacora-'+new Date().toISOString().slice(0,10)+'.json';a.click();globalThis.URL.revokeObjectURL(url)};
-async function session(s){user=s?.user||null;$('login').hidden=!!user;$('app').hidden=!user;$('logout').hidden=!user;if(user){try{await load()}catch(e){fail(e)}}else{items=[];$('cards').replaceChildren();$('editor').hidden=true;epoch++}}
+async function session(s){user=s?.user||null;$('login').hidden=!!user;$('app').hidden=!user;$('logout').hidden=!user;if(user){try{await load()}catch(e){fail(e)}}else{items=[];$('cards').replaceChildren();$('editor').hidden=true;if($('advanceDialog').open)$('advanceDialog').close();advanceItem=null;editing=null;tab='Inicio';relatedFilter=null;$('search').value='';epoch++}}
 if(!KEY.startsWith('sb_publishable_')){msg('Instalación pendiente: configura Supabase según la guía.');$('loginForm').querySelector('button').disabled=true}else{db=createClient(URL,KEY);$('loginForm').onsubmit=async e=>{e.preventDefault();msg('');let {data,error}=await db.auth.signInWithPassword({email:$('email').value,password:$('password').value});$('password').value='';if(error)fail(error);else await session(data.session)};$('logout').onclick=async()=>{let {error}=await db.auth.signOut();if(error)fail(error);else await session(null)};let {data}=await db.auth.getSession();await session(data.session);db.auth.onAuthStateChange((event,s)=>{if(event==='SIGNED_OUT')session(null)})}
 </script></html>
