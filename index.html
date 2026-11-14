@@ -88,8 +88,38 @@ article .images img{max-height:140px;max-width:100%;object-fit:contain}
 button:disabled{opacity:.55;cursor:not-allowed}
 @media(max-width:900px){main{padding:18px}#app{grid-template-columns:1fr;gap:14px}#sidebar{position:static;padding:12px}#nav{flex-direction:row;flex-wrap:wrap}#nav button{flex:1;min-width:125px}#sidebar h3,#sidebar .side-note{display:none}}
 @media(max-width:550px){header{padding:18px}header h1{font-size:23px}main{padding:12px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.stats>div{padding:13px}.toolbar{align-items:stretch}.toolbar #search{flex-basis:100%}.dashboard-head h2{font-size:23px}.view-switch{width:100%}.view-switch button{flex:1}}
+
+/* V1.2 — agenda personal */
+#agenda{margin:16px 0;padding:18px;background:white;border:1px solid #dce4eb;border-radius:14px}
+.agenda-top,.calendar-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.agenda-top h3,.calendar-head h3{margin:0;font-size:19px}
+.agenda-counts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:15px 0}
+.agenda-counts button{color:#18334a;text-align:left;border:1px solid #dce4eb;background:#f4f8fb;padding:12px;min-width:0}
+.agenda-counts strong{display:block;font-size:25px}
+.agenda-counts .late{background:#fff0ef;border-color:#edb7b3;color:#a33131}
+.agenda-counts .today{background:#fff8d9;border-color:#dfc66f;color:#806000}
+.agenda-counts .soon{background:#eaf8ea;border-color:#a7cdb5;color:#176b51}
+.agenda-counts button[aria-pressed=true]{outline:2px solid currentColor;outline-offset:2px}
+.agenda-row{display:flex;align-items:center;gap:12px;border-top:1px solid #e3eaf0;padding:12px 0}
+.agenda-row .date-box{min-width:85px;font-size:13px;font-weight:700;color:#344e67}
+.agenda-row .agenda-info{flex:1;min-width:0;overflow-wrap:anywhere}
+.agenda-row .agenda-info small{display:block;margin-top:4px}
+.agenda-row button{font-size:12px;flex-shrink:0}
+.deadline{display:inline-block;font-size:12px;font-weight:700;padding:4px 8px;border-radius:6px;margin-left:8px}
+.deadline.late{background:#fff0ef;color:#a33131}.deadline.today{background:#fff8d9;color:#806000}.deadline.soon{background:#eaf8ea;color:#176b51}
+#calendarPanel{border-top:1px solid #dce4eb;padding-top:16px;margin-top:14px}
+.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;margin:14px 0}
+.calendar-grid .weekday{text-align:center;font-size:12px;color:#52667b;font-weight:700;padding:5px 0}
+.calendar-grid button{background:#f4f8fb;border:1px solid #dce4eb;color:#18334a;min-height:65px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:4px}
+.calendar-grid button.is-today{border:2px solid #176b51}
+.calendar-grid button.selected{background:#176b51;color:white}
+.calendar-grid button .events{font-size:11px;border-radius:10px;padding:2px 6px;background:#d7e9df;color:#176b51}
+.calendar-grid button.has-late .events{background:#ffe0dc;color:#a33131}
+.calendar-grid .blank{min-height:40px}
+#sort{width:auto;margin:0;background:white;max-width:100%}
+@media(max-width:550px){#agenda{padding:12px}.agenda-row{flex-wrap:wrap;gap:7px}.agenda-row .date-box{min-width:70px}.calendar-grid button{min-height:48px}.agenda-counts button{padding:8px;font-size:12px}}
 </style>
-<header><div><h1>BITÁCORA <b>XPRO HUB</b></h1>Ideas · Proyectos · Acción · V1.1 · Centro de operaciones</div><button id="logout" hidden>Cerrar sesión</button></header><main><p id="message" role="status"></p><section id="login"><h2>Acceso personal</h2><p>De una idea a una realidad.</p><form id="loginForm"><label>Correo<input type="email" id="email" required autocomplete="username"></label><label>Contraseña<input type="password" id="password" required autocomplete="current-password"></label><button>Ingresar</button></form></section><div id="app" hidden><aside id="sidebar"><h3>Mi espacio personal</h3><nav id="nav" aria-label="Navegación principal"></nav><div class="side-note"><small>BITÁCORA XPRO HUB<br>V1.1 · Acceso personal</small></div></aside><div id="workspace"><div class="dashboard-head"><div><h2>Mi centro de operaciones</h2><p id="today"></p></div><button id="new">＋ Nuevo registro</button></div><div class="stats" id="stats"></div><div class="toolbar"><input id="search" placeholder="Buscar en tus ideas, proyectos y pendientes…" aria-label="Buscar registros"><button id="backup" class="secondary">Exportar JSON</button><div class="view-switch"><button id="listView" type="button" aria-pressed="true">☰ Lista</button><button id="gridView" type="button" aria-pressed="false">▦ Tarjetas</button></div></div><section id="editor" hidden><h2 id="editorTitle">Nuevo registro</h2><p class="form-intro">Organiza tus ideas, avances y próximos pasos en un solo lugar.</p><form id="form">
+<header><div><h1>BITÁCORA <b>XPRO HUB</b></h1>Ideas · Proyectos · Acción · V1.2 · Agenda y proyectos</div><button id="logout" hidden>Cerrar sesión</button></header><main><p id="message" role="status"></p><section id="login"><h2>Acceso personal</h2><p>De una idea a una realidad.</p><form id="loginForm"><label>Correo<input type="email" id="email" required autocomplete="username"></label><label>Contraseña<input type="password" id="password" required autocomplete="current-password"></label><button>Ingresar</button></form></section><div id="app" hidden><aside id="sidebar"><h3>Mi espacio personal</h3><nav id="nav" aria-label="Navegación principal"></nav><div class="side-note"><small>BITÁCORA XPRO HUB<br>V1.2 · Acceso personal</small></div></aside><div id="workspace"><div class="dashboard-head"><div><h2>Mi centro de operaciones</h2><p id="today"></p></div><button id="new">＋ Nuevo registro</button></div><div class="stats" id="stats"></div><section id="agenda" hidden><div class="agenda-top"><h3>Mi agenda de trabajo</h3><button id="openCalendar" type="button" class="secondary">Calendario mensual</button></div><div id="agendaCounts" class="agenda-counts"></div><div id="calendarPanel" hidden><div class="calendar-head"><button id="prevMonth" type="button" class="secondary" aria-label="Mes anterior">‹</button><h3 id="monthTitle"></h3><button id="nextMonth" type="button" class="secondary" aria-label="Mes siguiente">›</button><button id="currentMonth" type="button" class="secondary">Hoy</button></div><div id="calendarGrid" class="calendar-grid"></div></div><h3 id="agendaTitle"></h3><div id="agendaRows"></div></section><div class="toolbar"><input id="search" placeholder="Buscar en tus ideas, proyectos y pendientes…" aria-label="Buscar registros"><select id="sort" aria-label="Ordenar registros"><option value="recent">Última actividad</option><option value="priority">Prioridad</option><option value="due">Fecha límite</option><option value="progress">Mayor avance</option></select><button id="backup" class="secondary">Exportar JSON</button><div class="view-switch"><button id="listView" type="button" aria-pressed="true">☰ Lista</button><button id="gridView" type="button" aria-pressed="false">▦ Tarjetas</button></div></div><section id="editor" hidden><h2 id="editorTitle">Nuevo registro</h2><p class="form-intro">Organiza tus ideas, avances y próximos pasos en un solo lugar.</p><form id="form">
 <div class="form-block"><h3>01 · Datos generales</h3><label>Tipo<select name="kind"><option>Proyecto</option><option>Idea</option><option>Pendiente</option></select></label><label>Título<input name="title" required maxlength="200" placeholder="Nombre del proyecto, idea o pendiente"></label><label>Descripción<textarea name="description" placeholder="Describe el objetivo y alcance del registro…"></textarea></label></div>
 <div class="form-block control"><h3>02 · Planificación y control</h3><label>Proyecto relacionado<select name="parent_id" id="parents"></select></label><div class="form-columns"><label>Estado<select name="status"><option>Por iniciar</option><option>En desarrollo</option><option>En pausa</option><option>Finalizado</option></select></label><label>Prioridad<select name="priority"><option>Media</option><option>Alta</option><option>Baja</option></select></label><label>Avance (%)<input name="progress" type="number" min="0" max="100" value="0" required></label><label>Fecha límite<input name="due" type="date"></label></div></div>
 <div class="form-block follow"><h3>03 · Seguimiento del proyecto</h3><label>Último avance<textarea name="last_step" placeholder="¿Qué fue lo último que realizaste?"></textarea></label><label>Próxima acción<textarea name="next_step" placeholder="¿Cuál es el siguiente paso concreto?"></textarea></label></div>
@@ -103,20 +133,54 @@ function el(tag,text,cls){const n=document.createElement(tag);if(text!=null)n.te
 function fail(e){msg(e?.message||String(e))}async function load(){const {data,error}=await db.from('entries').select('*').order('updated_at',{ascending:false});if(error)throw error;items=data;render()}
 
 let view='list',advanceItem=null,advanceBusy=false,relatedFilter=null;
-const labels={Inicio:'Inicio',Proyecto:'Proyectos',Idea:'Ideas',Pendiente:'Pendientes',Finalizado:'Finalizados'};
-const icons={Inicio:'⌂',Proyecto:'▣',Idea:'✦',Pendiente:'✓',Finalizado:'◉'};
-function go(t){tab=t;relatedFilter=null;$('search').value='';render()}
+const labels={Inicio:'Inicio',Proyecto:'Proyectos',Idea:'Ideas',Pendiente:'Pendientes',Finalizado:'Finalizados',Calendario:'Calendario'};
+const icons={Inicio:'⌂',Proyecto:'▣',Idea:'✦',Pendiente:'✓',Finalizado:'◉',Calendario:'▦'};
+function go(t){msg('');tab=t;relatedFilter=null;$('search').value='';if(t==='Calendario'){agendaFilter='all';selectedDay=null}render()}
 function dateText(v){return v?v.split('-').reverse().join('/'):''}
 function daysAgo(v){const n=Math.max(0,Math.floor((Date.now()-new Date(v).getTime())/86400000));return n===0?'Hoy':n===1?'Hace 1 día':'Hace '+n+' días'}
 function field(a,label,value,cls){let d=el('div',null,'field '+cls);add(d,el('strong',label),document.createTextNode(value||'Sin registrar'));a.append(d)}
 function active(x){return x.status!=='Finalizado'}
+
+function dayKey(d){let p=new Intl.DateTimeFormat('en-US',{timeZone:'America/Lima',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(d);let get=k=>p.find(x=>x.type===k).value;return get('year')+'-'+get('month')+'-'+get('day')}
+const todayKey=()=>dayKey(new Date());
+const dateNum=k=>Date.parse(k+'T00:00:00Z');
+function deadlineType(x){if(!active(x)||!x.due)return '';let n=(dateNum(x.due)-dateNum(todayKey()))/86400000;return n<0?'late':n===0?'today':n<=7?'soon':''}
+const priorityRank=x=>({Alta:0,Media:1,Baja:2}[x.priority]??3);
+let agendaFilter='all',selectedDay=null,monthOffset=0;
+function renderAgenda(){
+ const show=tab==='Inicio'||tab==='Calendario';$('agenda').hidden=!show;if(!show)return;
+ const dated=items.filter(x=>active(x)&&x.due).sort((a,b)=>a.due.localeCompare(b.due)||priorityRank(a)-priorityRank(b));
+ const cal=tab==='Calendario';$('calendarPanel').hidden=!cal;$('openCalendar').hidden=cal;
+ const groups=[['late','Vencidos'],['today','Para hoy'],['soon','Próximos 7 días']];
+ $('agendaCounts').replaceChildren(...groups.map(([k,label])=>{let b=btn('',()=>{agendaFilter=agendaFilter===k?'all':k;selectedDay=null;renderAgenda()},k);add(b,el('strong',dated.filter(x=>deadlineType(x)===k).length),el('span',label));b.setAttribute('aria-pressed',String(agendaFilter===k&&!selectedDay));return b}));
+ if(cal){
+  const [y,m]=todayKey().split('-').map(Number);let first=new Date(Date.UTC(y,m-1+monthOffset,1));let yr=first.getUTCFullYear(),mo=first.getUTCMonth();let days=new Date(Date.UTC(yr,mo+1,0)).getUTCDate(),start=(first.getUTCDay()+6)%7;
+  $('monthTitle').textContent=first.toLocaleDateString('es-PE',{month:'long',year:'numeric',timeZone:'UTC'});
+  const grid=$('calendarGrid');grid.replaceChildren(...['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'].map(t=>el('div',t,'weekday')));
+  for(let i=0;i<start;i++)grid.append(el('div',null,'blank'));
+  for(let d=1;d<=days;d++){let k=yr+'-'+String(mo+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');let events=dated.filter(x=>x.due===k);let b=btn(String(d),()=>{selectedDay=k;agendaFilter='all';renderAgenda()},(k===todayKey()?'is-today ':'')+(k===selectedDay?'selected ':'')+(events.some(x=>deadlineType(x)==='late')?'has-late':''));b.setAttribute('aria-label',dateText(k)+', '+events.length+' registros');if(events.length)b.append(el('span',events.length,'events'));grid.append(b)}
+ }
+ let list=selectedDay?dated.filter(x=>x.due===selectedDay):agendaFilter==='all'?(cal?dated.filter(x=>x.due.slice(0,7)===monthKey()):dated.filter(x=>deadlineType(x))):dated.filter(x=>deadlineType(x)===agendaFilter);
+ $('agendaTitle').textContent=selectedDay?'Actividades del '+dateText(selectedDay):agendaFilter==='all'?(cal?'Actividades del mes':'Actividades prioritarias'):groups.find(g=>g[0]===agendaFilter)[1];
+ $('agendaRows').replaceChildren();if(!list.length)$('agendaRows').append(el('p','No hay actividades en este período.'));
+ for(let x of list){let row=el('div',null,'agenda-row'),info=el('div',null,'agenda-info');add(info,el('strong',x.title),el('small',x.kind+' · Prioridad '+x.priority+' · '+x.progress+'%'));let date=el('span',dateText(x.due),'date-box');let k=deadlineType(x);if(k)date.append(el('div',({late:'Vencido',today:'Hoy',soon:'Próximo'})[k],'deadline '+k));add(row,date,info,btn('Editar',()=>edit(x),'secondary'));$('agendaRows').append(row)}
+}
+function monthKey(){let [y,m]=todayKey().split('-').map(Number);let d=new Date(Date.UTC(y,m-1+monthOffset,1));return d.getUTCFullYear()+'-'+String(d.getUTCMonth()+1).padStart(2,'0')}
+$('openCalendar').onclick=()=>go('Calendario');
+$('prevMonth').onclick=()=>{monthOffset--;selectedDay=null;agendaFilter='all';renderAgenda()};
+$('nextMonth').onclick=()=>{monthOffset++;selectedDay=null;agendaFilter='all';renderAgenda()};
+$('currentMonth').onclick=()=>{monthOffset=0;selectedDay=todayKey();agendaFilter='all';renderAgenda()};
+$('sort').onchange=render;
+
 function render(){
  let stamp=++epoch;let q=$('search').value.trim().toLowerCase();let count=t=>items.filter(x=>t==='Finalizado'?x.status===t:x.kind===t&&active(x)).length;
  $('today').textContent=new Date().toLocaleDateString('es-PE',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
  $('stats').replaceChildren();for(let t of ['Proyecto','Idea','Pendiente','Finalizado']){let d=el('div');add(d,el('strong',count(t)),el('span',labels[t]));$('stats').append(d)}
- $('nav').replaceChildren(...Object.keys(labels).map(t=>{let b=btn(icons[t]+'  '+labels[t],()=>go(t),t===tab?'active':'');b.setAttribute('aria-current',t===tab?'page':'false');if(t!=='Inicio')b.append(el('span',count(t)));return b}));
+ $('nav').replaceChildren(...Object.keys(labels).map(t=>{let b=btn(icons[t]+'  '+labels[t],()=>go(t),t===tab?'active':'');b.setAttribute('aria-current',t===tab?'page':'false');if(t!=='Inicio'&&t!=='Calendario')b.append(el('span',count(t)));return b}));
+ renderAgenda();$('cards').hidden=tab==='Calendario';$('heading').parentElement.hidden=tab==='Calendario';$('listView').parentElement.hidden=tab==='Calendario';$('sort').hidden=tab==='Calendario';$('search').hidden=tab==='Calendario';
  let matches=x=>JSON.stringify(x).toLowerCase().includes(q);
  let list=items.filter(x=>{if(!matches(x))return false;if(relatedFilter)return x.parent_id===relatedFilter&&x.kind===tab;if(tab==='Inicio')return active(x)&&(q||!x.parent_id||!items.some(p=>p.id===x.parent_id&&active(p)));if(tab==='Finalizado')return !active(x);return active(x)&&x.kind===tab});
+ let sort=$('sort').value;if(sort==='priority')list.sort((a,b)=>priorityRank(a)-priorityRank(b));if(sort==='due')list.sort((a,b)=>(a.due||'9999-12-31').localeCompare(b.due||'9999-12-31'));if(sort==='progress')list.sort((a,b)=>b.progress-a.progress);
  $('heading').textContent=relatedFilter?labels[tab]+' · '+(items.find(x=>x.id===relatedFilter)?.title||'Proyecto'):tab==='Inicio'?'¿Dónde me quedé?':labels[tab];
  $('resultCount').textContent=list.length+' '+(list.length===1?'registro':'registros');
  $('cards').className=view==='list'?'list':'grid';for(let [id,v] of [['listView','list'],['gridView','grid']]){$(id).classList.toggle('active',view===v);$(id).setAttribute('aria-pressed',String(view===v))}
@@ -125,7 +189,7 @@ function render(){
   let a=el('article'),meta=el('div',null,'meta');add(meta,el('span',x.kind,'tag'),el('span',x.status,'tag'),el('span','Prioridad '+x.priority,'tag priority-'+x.priority));add(a,meta,el('h3',x.title));
   if(x.description)field(a,'Descripción',x.description,'description');
   let pr=el('progress');pr.max=100;pr.value=x.progress;let prow=el('div',null,'progress-row');add(prow,pr,el('strong',x.progress+'%'));add(a,prow,el('small','Última actividad: '+daysAgo(x.updated_at)+' · '+new Date(x.updated_at).toLocaleString('es-PE')));
-  if(x.due)add(a,el('p','Fecha límite: '+dateText(x.due)));
+  if(x.due){let p=el('p','Fecha límite: '+dateText(x.due));let k=deadlineType(x);if(k)p.append(el('span',({late:'Vencido',today:'Hoy',soon:'Próximo'})[k],'deadline '+k));add(a,p)}
   let parent=items.find(i=>i.id===x.parent_id);if(parent)add(a,el('small','Proyecto: '+parent.title));
   field(a,'Último avance',x.last_step,'last');field(a,'Próxima acción',x.next_step,'next');
   for(let line of (x.links||'').split('\n')){let u=safeLink(line.trim());if(u){let link=el('a',line);link.href=u;link.target='_blank';link.rel='noopener noreferrer';add(a,link,el('div'))}}
@@ -133,7 +197,7 @@ function render(){
   if(active(x))actions.append(btn('Finalizar',async()=>{if(!confirm('¿Marcar este registro como finalizado?'))return;try{let {error}=await db.from('entries').update({status:'Finalizado',progress:100}).eq('id',x.id);if(error)throw error;await load();msg('🟢 OK — Registro finalizado.',true)}catch(e){fail(e)}},'secondary'));
   actions.append(btn('Eliminar',async()=>{if(!confirm('¿Eliminar este registro? Sus registros relacionados quedarán sin proyecto.'))return;try{let {error}=await db.from('entries').delete().eq('id',x.id);if(error)throw error;if(x.images?.length){let r=await db.storage.from('private-images').remove(x.images);if(r.error){await load();fail(r.error);return}}await load();msg('🟢 OK — Registro eliminado.',true)}catch(e){fail(e)}},'danger'));add(a,actions);
   if(x.kind==='Proyecto'){
-   let children=items.filter(i=>i.parent_id===x.id);let d=el('details',null,'related');let ni=children.filter(i=>i.kind==='Idea').length,np=children.filter(i=>i.kind==='Pendiente').length,npr=children.filter(i=>i.kind==='Proyecto').length;add(d,el('summary',ni+' ideas · '+np+' pendientes'+(npr?' · '+npr+' subproyectos':'')));
+   let children=items.filter(i=>i.parent_id===x.id);let d=el('details',null,'related');let ni=children.filter(i=>i.kind==='Idea').length,np=children.filter(i=>i.kind==='Pendiente').length,npr=children.filter(i=>i.kind==='Proyecto').length;add(d,el('summary',ni+(ni===1?' idea':' ideas')+' · '+np+(np===1?' pendiente':' pendientes')+(npr?' · '+npr+(npr===1?' subproyecto':' subproyectos'):'')));
    if(!children.length)d.append(el('p','Aún no hay registros relacionados.'));
    for(let child of children){let row=el('div',null,'related-row');add(row,el('span',child.kind+' · '+child.title+' ('+child.status+')'),btn('Editar',()=>edit(child),'secondary'));d.append(row)}
    let ra=el('div',null,'actions');add(ra,btn('+ Idea',()=>newRelated(x,'Idea'),'secondary'),btn('+ Pendiente',()=>newRelated(x,'Pendiente'),'secondary'));d.append(ra);a.append(d)
@@ -152,6 +216,6 @@ $('listView').onclick=()=>{view='list';render()};$('gridView').onclick=()=>{view
 function edit(x){if($('save').disabled)return;editing=x||null;f.reset();$('parents').replaceChildren(new Option('Sin proyecto',''),...items.filter(i=>i.kind==='Proyecto'&&i.id!==x?.id).map(i=>new Option(i.title,i.id)));if(x)for(let k of ['kind','title','description','parent_id','status','priority','progress','due','last_step','next_step','links'])f.elements[k].value=x[k]??'';else if(['Proyecto','Idea','Pendiente'].includes(tab))f.elements.kind.value=tab;$('editor').hidden=false;$('editorTitle').textContent=x?'Editar registro':'Nuevo registro';$('save').textContent=x?'✓ Guardar cambios':'✓ Guardar registro';$('editor').scrollIntoView({behavior:'smooth'})}
 $('new').onclick=()=>edit();$('cancel').onclick=()=>{$('editor').hidden=true};$('search').oninput=render;f.onsubmit=async e=>{e.preventDefault();$('save').disabled=true;let uploaded=null;try{let v=Object.fromEntries(new FormData(f));v.progress=Number(v.progress);v.due=v.due||null;v.parent_id=v.parent_id||null;v.owner=user.id;v.images=[...(editing?.images||[])];v.history=[...(editing?.history||[])];if(v.last_step&&v.last_step!==editing?.last_step)v.history.push({date:new Date().toISOString(),text:v.last_step});let file=$('image').files[0];if(file){if(file.size>5*1024*1024||!['image/jpeg','image/png','image/webp','image/gif'].includes(file.type))throw Error('Imagen no válida o mayor a 5 MB');uploaded=user.id+'/'+crypto.randomUUID();let {error}=await db.storage.from('private-images').upload(uploaded,file,{contentType:file.type});if(error)throw error;v.images.push(uploaded)}let r=editing?await db.from('entries').update(v).eq('id',editing.id):await db.from('entries').insert(v);if(r.error)throw r.error;uploaded=null;$('editor').hidden=true;await load();msg('🟢 OK — Registro guardado correctamente.',true)}catch(e){if(uploaded)await db.storage.from('private-images').remove([uploaded]);fail(e)}finally{$('save').disabled=false}};
 $('backup').onclick=()=>{let url=globalThis.URL.createObjectURL(new Blob([JSON.stringify(items,null,2)],{type:'application/json'}));let a=el('a');a.href=url;a.download='bitacora-'+new Date().toISOString().slice(0,10)+'.json';a.click();globalThis.URL.revokeObjectURL(url)};
-async function session(s){user=s?.user||null;$('login').hidden=!!user;$('app').hidden=!user;$('logout').hidden=!user;if(user){try{await load()}catch(e){fail(e)}}else{items=[];$('cards').replaceChildren();$('editor').hidden=true;if($('advanceDialog').open)$('advanceDialog').close();advanceItem=null;editing=null;tab='Inicio';relatedFilter=null;$('search').value='';epoch++}}
+async function session(s){user=s?.user||null;$('login').hidden=!!user;$('app').hidden=!user;$('logout').hidden=!user;if(user){try{await load()}catch(e){fail(e)}}else{items=[];$('cards').replaceChildren();$('editor').hidden=true;if($('advanceDialog').open)$('advanceDialog').close();advanceItem=null;editing=null;tab='Inicio';relatedFilter=null;agendaFilter='all';selectedDay=null;monthOffset=0;$('agendaRows').replaceChildren();$('calendarGrid').replaceChildren();$('search').value='';epoch++}}
 if(!KEY.startsWith('sb_publishable_')){msg('Instalación pendiente: configura Supabase según la guía.');$('loginForm').querySelector('button').disabled=true}else{db=createClient(URL,KEY);$('loginForm').onsubmit=async e=>{e.preventDefault();msg('');let {data,error}=await db.auth.signInWithPassword({email:$('email').value,password:$('password').value});$('password').value='';if(error)fail(error);else await session(data.session)};$('logout').onclick=async()=>{let {error}=await db.auth.signOut();if(error)fail(error);else await session(null)};let {data}=await db.auth.getSession();await session(data.session);db.auth.onAuthStateChange((event,s)=>{if(event==='SIGNED_OUT')session(null)})}
 </script></html>
