@@ -1055,7 +1055,7 @@ function prepareAgentContext(audible=false){
  else if(scope){const selected=items.find(x=>x.id===scope);if(selected){const parent=selected.parent_id?items.find(x=>x.id===selected.parent_id):null;rows=[selected,...(parent?[parent]:[]),...orderedEntries().filter(x=>x.parent_id===selected.id&&x.id!==selected.id)]}}
  const max=5800;let context=scope?'Fecha de referencia: '+todayKey()+' (Lima)\nContexto de Bitácora (solo lectura; verificar vigencia). Cada sección identifica su registro de origen.\n\n':'';
  let count=0,truncated=false;agentPreparedCodes=[];
- const clean=(v,limit=400)=>String(v??'').replace(/\\s+/g,' ').trim().slice(0,limit);
+ const clean=(v,limit=400)=>String(v??'').replace(/\s+/g,' ').trim().slice(0,limit);
  for(const x of rows){
   const code=x.record_code||'Sin código',parent=items.find(p=>p.id===x.parent_id);
   let parts=['FUENTE: '+code+' — '+clean(x.title,160),'Tipo: '+(x.kind||'Sin registrar'),'Proyecto principal: '+(parent?.record_code||'Sin proyecto'),'Estado: '+(x.status||'Sin registrar'),'Prioridad: '+(x.priority||'Sin registrar'),'Avance: '+(x.progress==null?'Sin registrar':x.progress+'%'),'Fecha límite: '+(x.due||'Sin definir'),'Último avance: '+clean(x.last_step||'Sin registrar',450),'Próxima acción: '+clean(x.next_step||'Sin registrar',450)];
