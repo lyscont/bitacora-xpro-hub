@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>XPRO Music Studio V2.2.1 — Prueba independiente</title>
+<style>
+:root{color-scheme:light;font-family:system-ui,-apple-system,sans-serif}
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#f1f6fa;color:#18334a;padding:22px;box-sizing:border-box}
+main{width:min(100%,520px);padding:28px;background:white;border:1px solid #dce5ed;border-radius:18px;box-shadow:0 8px 30px #1232}
+h1{font-size:1.45rem;margin:0 0 9px}p{line-height:1.5}label{display:block;margin:18px 0;font-weight:650}
+select,input[type=range]{width:100%;margin-top:9px}button{background:#176b51;color:white;border:0;border-radius:10px;padding:12px 18px;cursor:pointer;font-weight:700}
+button.secondary{background:#e6eff4;color:#18334a}
+#musicDialog{position:static;margin:0;border:0;padding:0;width:100%;max-width:none;max-height:none}
+#musicDialog:not([open]){display:none}
+#musicVolumeLabel{float:right}
+small{color:#516779}
+</style></head><body><main>
+<h1>🎵 XPRO Music Studio V2.2.1</h1>
+<p><strong>Laboratorio musical independiente.</strong> No utiliza Supabase, contraseñas ni registros de Bitácora.</p>
+<button id="musicOpen" type="button">🎵 Música</button>
+<dialog id="musicDialog" open>
+<p>Activa la melodía y cambia a otra pestaña durante un minuto. La música debería mantenerse.</p>
+<label>Ambiente musical<select id="musicStyle"><option value="calma">Calma</option><option value="foco">Concentración</option></select></label>
+<label>Volumen <output id="musicVolumeLabel">20%</output><input id="musicVolume" type="range" min="0" max="100" value="20"></label>
+<p id="musicStatus" role="status"></p>
+<button id="musicToggle" type="button">▶ Reproducir</button>
+<button id="musicClose" type="button" class="secondary">Cerrar panel</button>
+</dialog>
+<p><small>Prueba experimental. La página original de Bitácora no fue reemplazada. Si se cierra esta pestaña, el audio se detendrá.</small></p>
+</main>
+<script>
+const $=id=>document.getElementById(id);
+const musicPrefsKey='xpro-ambient-music-v1';
+let musicPrefs={style:'calma',volume:20},musicPlaying=false,musicAudio=null,musicMaster=null,musicTimer=null,musicStep=0,musicNextTime=0;
+try{const p=JSON.parse(localStorage.getItem(musicPrefsKey)||'null');if(p&&['calma','foco'].includes(p.style)&&Number.isFinite(p.volume))musicPrefs={style:p.style,volume:Math.max(0,Math.min(100,Math.round(p.volume)))}}catch{}
+function musicSave(){try{localStorage.setItem(musicPrefsKey,JSON.stringify(musicPrefs))}catch{}}
+function musicUpdateUI(){
+ $('musicStyle').value=musicPrefs.style;$('musicVolume').value=String(musicPrefs.volume);$('musicVolumeLabel').textContent=musicPrefs.volume+'%';
+ $('musicToggle').textContent=musicPlaying?'❚❚ Pausar':'▶ Reproducir';
+ $('musicOpen').textContent=musicPlaying?'🎵 Música · Activa':'🎵 Música';
+ $('musicStatus').textContent=musicPlaying?'Reproduciendo música ambiental original · '+(musicPrefs.style==='calma'?'Calma':'Concentración'):'Música en pausa. Iníciala cuando desees.';
+}
+function musicNote(freq,start,duration,level){
+ if(!musicAudio||!musicMaster)return;
+ const osc=musicAudio.createOscillator(),env=musicAudio.createGain(),low=musicAudio.createBiquadFilter();
+ osc.type='sine';osc.frequency.setValueAtTime(freq,start);low.type='lowpass';low.frequency.value=1100;
+ env.gain.setValueAtTime(0,start);env.gain.linearRampToValueAtTime(level,start+.18);
+ env.gain.setValueAtTime(level,start+Math.max(.19,duration-.65));env.gain.exponentialRampToValueAtTime(.0001,start+duration);
+ osc.connect(low);low.connect(env);env.connect(musicMaster);osc.start(start);osc.stop(start+duration+.02);
+}
+function musicPhrase(t){
+ if(!musicPlaying||!musicAudio)return;
+ const calma=musicPrefs.style==='calma';
+ const seq=calma?[220,261.63,329.63,293.66,246.94,196,246.94,261.63]:[174.61,220,261.63,220,196,246.94,293.66,246.94];
+ const root=calma?130.81:110,base=seq[musicStep%seq.length];musicNote(base,t,2.9,.12);
+ if(musicStep%2===0)musicNote(root,t,5.8,.045);
+ if(musicStep%4===0)musicNote(base*1.5,t+.7,2.5,.023);
+function musicSchedule(){
+ if(!musicPlaying||!musicAudio||musicAudio.state!=='running')return;
+ const now=musicAudio.currentTime;
+ if(musicNextTime<now)musicNextTime=now+.04;
+ while(musicNextTime<now+30){musicPhrase(musicNextTime);musicNextTime+=3}
+}
+ musicStep++;
+}
+async function musicStart(){
+ try{
+  const A=window.AudioContext||window.webkitAudioContext;if(!A)throw Error('Audio no disponible');
+  if(!musicAudio){musicAudio=new A();musicMaster=musicAudio.createGain();musicMaster.connect(musicAudio.destination)}
+  if(musicAudio.state!=='running')await musicAudio.resume();
+  if(musicAudio.state!=='running')throw Error('Chrome bloqueó el audio');
+  musicMaster.gain.setTargetAtTime(musicPrefs.volume/100*.28,musicAudio.currentTime,.08);
+  musicPlaying=true;musicStep=0;musicNextTime=musicAudio.currentTime+.04;musicSchedule();
+  if(musicTimer!==null)clearInterval(musicTimer);musicTimer=setInterval(musicSchedule,1000);
+ }catch(e){musicPlaying=false;$('musicStatus').textContent='No se pudo activar el audio. Comprueba el sonido del navegador.'}
+ musicUpdateUI();
+}
+function musicStop(){
+ musicPlaying=false;if(musicTimer!==null){clearInterval(musicTimer);musicTimer=null}
+ if(musicMaster&&musicAudio)musicMaster.gain.setTargetAtTime(0,musicAudio.currentTime,.06);
+ musicUpdateUI();
+}
+$('musicOpen').onclick=()=>{musicUpdateUI();$('musicDialog').showModal()};
+$('musicClose').onclick=()=>$('musicDialog').close();
+$('musicToggle').onclick=()=>musicPlaying?musicStop():musicStart();
+$('musicStyle').onchange=()=>{musicPrefs.style=$('musicStyle').value;musicSave();if(musicPlaying){musicStop();musicStart()}else musicUpdateUI()};
+$('musicVolume').oninput=()=>{musicPrefs.volume=Number($('musicVolume').value);musicSave();if(musicMaster&&musicAudio)musicMaster.gain.setTargetAtTime(musicPlaying?musicPrefs.volume/100*.28:0,musicAudio.currentTime,.08);musicUpdateUI()};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&musicPlaying){if(musicAudio?.state==='suspended')musicAudio.resume().then(musicSchedule).catch(()=>{});else musicSchedule()}}); // No pausar al cambiar de pestaña
+musicUpdateUI();
+</script></body></html>
