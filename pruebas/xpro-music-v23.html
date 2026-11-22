@@ -14,7 +14,7 @@ button{background:#176b51;color:white;border:0;border-radius:9px;padding:10px 14
 <hr><h2>🎻 Biblioteca clásica</h2>
 <p class="muted">Obras de dominio público. Selecciona una grabación MP3 propia o autorizada para reproducir.</p>
 <label>Obra<select id="classicalWork"><option value="vivaldi">Vivaldi — Las cuatro estaciones</option><option value="bach">Bach — Preludio en do mayor, BWV 846</option><option value="mozart">Mozart — Eine kleine Nachtmusik, K. 525</option></select></label>
-<button id="classicalChoose" class="secondary">Elegir MP3 para esta obra</button><input id="classicalFile" type="file" accept="audio/mpeg,.mp3" hidden>
+<button id="classicalStream">▶ Escuchar obra en línea</button><button id="classicalChoose" class="secondary">Elegir MP3 para esta obra</button><p id="classicalCredit" class="muted">Créditos de grabación y licencia.</p><input id="classicalFile" type="file" accept="audio/mpeg,.mp3" hidden>
 <hr><h2>🎧 Mis MP3</h2><input id="musicFiles" type="file" accept="audio/mpeg,.mp3" multiple>
 <label>Lista de reproducción<select id="musicPlaylist" size="5"></select></label>
 <div class="dash-actions"><button id="musicTrackPlay">▶ Escuchar selección</button><button id="musicTrackNext" class="secondary">⏭ Siguiente</button><button id="musicTrackRemove" class="secondary">Quitar pista</button></div><p id="musicTrackStatus" role="status"></p>
@@ -96,7 +96,7 @@ function musicStop(){
 }
 $('musicOpen').onclick=()=>{musicUpdateUI();$('musicDialog').showModal()};
 $('musicClose').onclick=()=>{$('musicDialog').close()};
-$('musicStop').onclick=musicStop;
+$('musicStop').onclick=()=>{musicStop();musicStopMp3();musicTrackUI('■ Toda la música detenida.')};
 $('musicToggle').onclick=()=>musicPlaying?musicStop():musicStart();
 $('musicStyle').onchange=()=>{musicPrefs.style=$('musicStyle').value;musicSave();if(musicPlaying){musicStop();musicStart()}else musicUpdateUI()};
 $('musicVolume').oninput=()=>{musicPrefs.volume=Number($('musicVolume').value);musicSave();if(musicMaster&&musicAudio)musicMaster.gain.setTargetAtTime(musicPlaying?musicPrefs.volume/100*.65:0,musicAudio.currentTime,.04);musicUpdateUI()};
@@ -131,7 +131,7 @@ async function musicPlayTrack(index){
  musicPlayer.src=musicTracks[index].url;
  musicPlayer.volume=musicPrefs.volume/100;
  try{await musicPlayer.play();musicTrackUI('♫ Reproduciendo: '+musicTracks[index].title)}
- catch(e){musicTrackUI('No se pudo reproducir el MP3: '+(e?.message||String(e)))}
+ catch(e){musicTrackUI('No se pudo reproducir la pista. Verifica tu conexión, el audio o la disponibilidad en Wikimedia Commons. '+(e?.message||String(e)))}
 }
 function musicAddFiles(files,prefix=''){
  let added=0;
@@ -166,7 +166,7 @@ $('musicTrackRemove').onclick=()=>{
  if(!Number.isInteger(selected)||selected<0||selected>=musicTracks.length)return;
  if(selected===musicTrackIndex)musicStopMp3();
  const [removed]=musicTracks.splice(selected,1);
- if(removed){window.URL.revokeObjectURL(removed.url);musicTrackURLs.delete(removed.url)}
+ if(removed&&!removed.remote){window.URL.revokeObjectURL(removed.url);musicTrackURLs.delete(removed.url)}
  musicTrackIndex=-1;musicTrackUI();
 };
 musicPlayer.addEventListener('ended',()=>{if(musicTracks.length)musicPlayTrack((musicTrackIndex+1)%musicTracks.length)});
@@ -174,6 +174,28 @@ musicPlayer.addEventListener('pause',()=>musicTrackUI());
 musicPlayer.addEventListener('play',()=>musicTrackUI());
 $('musicVolume').addEventListener('input',()=>{musicPlayer.volume=Number($('musicVolume').value)/100});
 window.addEventListener('pagehide',()=>{musicPlayer.pause();for(const url of musicTrackURLs)window.URL.revokeObjectURL(url)});
+const xproClassicalRecordings={
+ vivaldi:{title:'Vivaldi — Primavera, I. Allegro',artist:'John Harrison, violín · Wichita State University Chamber Players · Robert Turizziani, director',license:'CC BY-SA 4.0',url:'https://upload.wikimedia.org/wikipedia/commons/f/ff/Vivaldi_-_Four_Seasons_1_Spring_mvt_1_Allegro_-_John_Harrison_violin.oga',source:'https://commons.wikimedia.org/wiki/File:Vivaldi_-_Four_Seasons_1_Spring_mvt_1_Allegro_-_John_Harrison_violin.oga'},
+ bach:{title:'Bach — Preludio en do mayor, BWV 846',artist:'Kimiko Ishizaka, piano',license:'CC0 1.0',url:'https://upload.wikimedia.org/wikipedia/commons/b/b6/Kimiko_Ishizaka_-_Bach_-_Well-Tempered_Clavier%2C_Book_1_-_01_Prelude_No._1_in_C_major%2C_BWV_846.ogg',source:'https://commons.wikimedia.org/wiki/File:Kimiko_Ishizaka_-_Bach_-_Well-Tempered_Clavier,_Book_1_-_01_Prelude_No._1_in_C_major,_BWV_846.ogg'},
+ mozart:{title:'Mozart — Eine kleine Nachtmusik, I. Allegro',artist:'Advent Chamber Orchestra · Roxanna Pavel Goldstein, dirección',license:'CC BY-SA 2.0',url:'https://upload.wikimedia.org/wikipedia/commons/2/24/Mozart_-_Eine_kleine_Nachtmusik_-_1._Allegro.ogg',source:'https://commons.wikimedia.org/wiki/File:Mozart_-_Eine_kleine_Nachtmusik_-_1._Allegro.ogg'}
+};
+function musicPlayClassical(){
+ const rec=xproClassicalRecordings[$('classicalWork').value];if(!rec)return;
+ let index=musicTracks.findIndex(t=>t.url===rec.url);
+ if(index<0){musicTracks.push({title:rec.title,url:rec.url,remote:true});index=musicTracks.length-1}
+ musicPlayTrack(index);
+ musicShowCredit();
+}
+function musicShowCredit(){
+ const rec=xproClassicalRecordings[$('classicalWork').value];
+ const area=$('classicalCredit');area.replaceChildren();
+ if(!rec)return;
+ area.append(document.createTextNode(rec.artist+' · Licencia '+rec.license+' · '));
+ const a=document.createElement('a');a.href=rec.source;a.textContent='Fuente y condiciones';a.target='_blank';a.rel='noopener noreferrer';area.append(a);
+}
+$('classicalStream').onclick=musicPlayClassical;
+$('classicalWork').onchange=musicShowCredit;
+musicShowCredit();
 musicTrackUI();
 musicUpdateUI();
 </script></body></html>
