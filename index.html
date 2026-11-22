@@ -338,16 +338,17 @@ function musicPhrase(t){
  if(!musicPlaying||!musicAudio)return;
  const calma=musicPrefs.style==='calma';
  const seq=calma?[220,261.63,329.63,293.66,246.94,196,246.94,261.63]:[174.61,220,261.63,220,196,246.94,293.66,246.94];
- const root=calma?130.81:110,base=seq[musicStep%seq.length];musicNote(base,t,2.9,.12);
+ const root=calma?130.81:110,base=seq[musicStep%seq.length];
+ musicNote(base,t,2.9,.12);
  if(musicStep%2===0)musicNote(root,t,5.8,.045);
  if(musicStep%4===0)musicNote(base*1.5,t+.7,2.5,.023);
+ musicStep++;
+}
 function musicSchedule(){
  if(!musicPlaying||!musicAudio||musicAudio.state!=='running')return;
  const now=musicAudio.currentTime;
  if(musicNextTime<now)musicNextTime=now+.04;
  while(musicNextTime<now+30){musicPhrase(musicNextTime);musicNextTime+=3}
-}
- musicStep++;
 }
 async function musicStart(){
  try{
