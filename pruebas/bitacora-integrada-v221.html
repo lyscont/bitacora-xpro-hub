@@ -299,9 +299,9 @@ const previewFetch=(input,init={})=>{
  const request=input instanceof Request?input:null;
  const targetUrl=String(request?.url||input);
  const method=String(init.method||request?.method||'GET').toUpperCase();
- const projectOrigin=new URL(URL).origin;
+ const projectOrigin=new window.URL(URL).origin;
  if(targetUrl.startsWith(projectOrigin+'/')){
-  const p=new URL(targetUrl).pathname;
+  const p=new window.URL(targetUrl).pathname;
   const auth=p.startsWith('/auth/v1/');
   const safeRead=method==='GET'||method==='HEAD'||method==='OPTIONS';
   const authAllowed=auth&&['/auth/v1/token','/auth/v1/logout','/auth/v1/verify','/auth/v1/user'].some(x=>p.startsWith(x))&&['POST','PUT'].includes(method);
