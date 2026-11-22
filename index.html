@@ -399,7 +399,7 @@ function musicStop(){
 }
 $('musicOpen').onclick=()=>{musicUpdateUI();$('musicDialog').showModal()};
 $('musicClose').onclick=()=>{$('musicDialog').close()};
-$('musicStop').onclick=musicStop;
+$('musicStop').onclick=()=>{musicStop();musicStopMp3();musicTrackUI('■ Toda la música detenida.')};
 $('musicToggle').onclick=()=>musicPlaying?musicStop():musicStart();
 $('musicStyle').onchange=()=>{musicPrefs.style=$('musicStyle').value;musicSave();if(musicPlaying){musicStop();musicStart()}else musicUpdateUI()};
 $('musicVolume').oninput=()=>{musicPrefs.volume=Number($('musicVolume').value);musicSave();if(musicMaster&&musicAudio)musicMaster.gain.setTargetAtTime(musicPlaying?musicPrefs.volume/100*.65:0,musicAudio.currentTime,.04);musicUpdateUI()};
