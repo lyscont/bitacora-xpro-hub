@@ -317,7 +317,7 @@ function confirmationSound(force=false){if(!force&&!soundEnabled)return;try{unlo
 
 // V2.2.1: ambiente musical original mediante Web Audio. No usa activos ni servicios de terceros.
 const musicPrefsKey='xpro-ambient-music-v1';
-let musicPrefs={style:'calma',volume:20},musicPlaying=false,musicAudio=null,musicMaster=null,musicTimer=null,musicStep=0;
+let musicPrefs={style:'calma',volume:20},musicPlaying=false,musicAudio=null,musicMaster=null,musicTimer=null,musicStep=0,musicNextTime=0;
 try{const p=JSON.parse(localStorage.getItem(musicPrefsKey)||'null');if(p&&['calma','foco'].includes(p.style)&&Number.isFinite(p.volume))musicPrefs={style:p.style,volume:Math.max(0,Math.min(100,Math.round(p.volume)))}}catch{}
 function musicSave(){try{localStorage.setItem(musicPrefsKey,JSON.stringify(musicPrefs))}catch{}}
 function musicUpdateUI(){
@@ -334,13 +334,19 @@ function musicNote(freq,start,duration,level){
  env.gain.setValueAtTime(level,start+Math.max(.19,duration-.65));env.gain.exponentialRampToValueAtTime(.0001,start+duration);
  osc.connect(low);low.connect(env);env.connect(musicMaster);osc.start(start);osc.stop(start+duration+.02);
 }
-function musicPhrase(){
+function musicPhrase(t){
  if(!musicPlaying||!musicAudio)return;
- const t=musicAudio.currentTime+.04,calma=musicPrefs.style==='calma';
+ const calma=musicPrefs.style==='calma';
  const seq=calma?[220,261.63,329.63,293.66,246.94,196,246.94,261.63]:[174.61,220,261.63,220,196,246.94,293.66,246.94];
  const root=calma?130.81:110,base=seq[musicStep%seq.length];musicNote(base,t,2.9,.12);
  if(musicStep%2===0)musicNote(root,t,5.8,.045);
  if(musicStep%4===0)musicNote(base*1.5,t+.7,2.5,.023);
+function musicSchedule(){
+ if(!musicPlaying||!musicAudio||musicAudio.state!=='running')return;
+ const now=musicAudio.currentTime;
+ if(musicNextTime<now)musicNextTime=now+.04;
+ while(musicNextTime<now+30){musicPhrase(musicNextTime);musicNextTime+=3}
+}
  musicStep++;
 }
 async function musicStart(){
@@ -350,8 +356,8 @@ async function musicStart(){
   if(musicAudio.state!=='running')await musicAudio.resume();
   if(musicAudio.state!=='running')throw Error('Chrome bloqueó el audio');
   musicMaster.gain.setTargetAtTime(musicPrefs.volume/100*.28,musicAudio.currentTime,.08);
-  musicPlaying=true;musicStep=0;musicPhrase();
-  if(musicTimer!==null)clearInterval(musicTimer);musicTimer=setInterval(musicPhrase,3000);
+  musicPlaying=true;musicStep=0;musicNextTime=musicAudio.currentTime+.04;musicSchedule();
+  if(musicTimer!==null)clearInterval(musicTimer);musicTimer=setInterval(musicSchedule,1000);
  }catch(e){musicPlaying=false;$('musicStatus').textContent='No se pudo activar el audio. Comprueba el sonido del navegador.'}
  musicUpdateUI();
 }
@@ -365,7 +371,7 @@ $('musicClose').onclick=()=>$('musicDialog').close();
 $('musicToggle').onclick=()=>musicPlaying?musicStop():musicStart();
 $('musicStyle').onchange=()=>{musicPrefs.style=$('musicStyle').value;musicSave();if(musicPlaying){musicStop();musicStart()}else musicUpdateUI()};
 $('musicVolume').oninput=()=>{musicPrefs.volume=Number($('musicVolume').value);musicSave();if(musicMaster&&musicAudio)musicMaster.gain.setTargetAtTime(musicPlaying?musicPrefs.volume/100*.28:0,musicAudio.currentTime,.08);musicUpdateUI()};
-document.addEventListener('visibilitychange',()=>{if(document.hidden&&musicPlaying){musicStop()}}); // privacidad: nunca sigue tocando en pestaña oculta
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&musicPlaying){if(musicAudio?.state==='suspended')musicAudio.resume().then(musicSchedule).catch(()=>{});else musicSchedule()}}); // No pausar al cambiar de pestaña
 musicUpdateUI();
 
 $('themeSoundTest').onclick=()=>{confirmationSound(true);$('themeStatus').textContent='Prueba de sonido solicitada. Verifica el volumen del equipo.'};
