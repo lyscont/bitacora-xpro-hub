@@ -440,7 +440,7 @@ function musicAddFiles(files,prefix=''){
  let added=0;
  for(const file of Array.from(files||[])){
   if(!/\.mp3$/i.test(file.name)&&file.type!=='audio/mpeg')continue;
-  const url=URL.createObjectURL(file);
+  const url=window.URL.createObjectURL(file);
   musicTrackURLs.add(url);
   musicTracks.push({title:prefix?prefix+' · '+file.name:file.name,url});
   added++;
@@ -456,7 +456,7 @@ $('classicalFile').addEventListener('change',e=>{
 $('musicTrackPlay').onclick=()=>{
  if(!musicPlayer.paused){musicPlayer.pause();musicTrackUI('MP3 pausado.');return}
  const choice=Number($('musicPlaylist').value);
- const index=musicTrackIndex>=0&&musicPlayer.src&&musicTracks[musicTrackIndex]?.url===musicPlayer.src?musicTrackIndex:choice;
+ const index=Number.isInteger(choice)&&choice>=0&&choice<musicTracks.length?choice:musicTrackIndex;
  if(index>=0&&index<musicTracks.length){
   if(musicPlayer.src===musicTracks[index].url){musicPlayer.play().then(()=>musicTrackUI()).catch(e=>musicTrackUI('No se pudo iniciar: '+e.message))}
   else musicPlayTrack(index);
@@ -469,14 +469,14 @@ $('musicTrackRemove').onclick=()=>{
  if(!Number.isInteger(selected)||selected<0||selected>=musicTracks.length)return;
  if(selected===musicTrackIndex)musicStopMp3();
  const [removed]=musicTracks.splice(selected,1);
- if(removed){URL.revokeObjectURL(removed.url);musicTrackURLs.delete(removed.url)}
+ if(removed){window.URL.revokeObjectURL(removed.url);musicTrackURLs.delete(removed.url)}
  musicTrackIndex=-1;musicTrackUI();
 };
 musicPlayer.addEventListener('ended',()=>{if(musicTracks.length)musicPlayTrack((musicTrackIndex+1)%musicTracks.length)});
 musicPlayer.addEventListener('pause',()=>musicTrackUI());
 musicPlayer.addEventListener('play',()=>musicTrackUI());
 $('musicVolume').addEventListener('input',()=>{musicPlayer.volume=Number($('musicVolume').value)/100});
-window.addEventListener('pagehide',()=>{musicPlayer.pause();for(const url of musicTrackURLs)URL.revokeObjectURL(url)});
+window.addEventListener('pagehide',()=>{musicPlayer.pause();for(const url of musicTrackURLs)window.URL.revokeObjectURL(url)});
 musicTrackUI();
 musicUpdateUI();
 
@@ -608,12 +608,12 @@ $('listView').onclick=()=>{view='list';render()};$('gridView').onclick=()=>{view
 const imageTypes=['image/jpeg','image/png','image/webp','image/gif'];
 let pendingImages=[],viewerEntry=null,viewerIndex=0,viewerToken=0,viewerBlob=null,mediaBusy=false;
 function imageNotice(t){$('imageNotice').textContent=t}
-function clearPending(){for(let p of pendingImages)globalThis.URL.revokeObjectURL(p.url);pendingImages=[];$('image').value='';$('pendingImages').replaceChildren();imageNotice('')}
-function drawPending(){let area=$('pendingImages');area.replaceChildren();for(let p of pendingImages){let card=el('div',null,'pending-image'),im=el('img');im.src=p.url;im.alt=p.file.name;let remove=btn('Quitar',()=>{if($('save').disabled)return;pendingImages=pendingImages.filter(x=>x!==p);globalThis.URL.revokeObjectURL(p.url);drawPending();imageNotice(pendingImages.length+' imágenes nuevas seleccionadas.')},'secondary');add(card,im,el('small',p.file.name),remove);area.append(card)}}
+function clearPending(){for(let p of pendingImages)globalThis.window.URL.revokeObjectURL(p.url);pendingImages=[];$('image').value='';$('pendingImages').replaceChildren();imageNotice('')}
+function drawPending(){let area=$('pendingImages');area.replaceChildren();for(let p of pendingImages){let card=el('div',null,'pending-image'),im=el('img');im.src=p.url;im.alt=p.file.name;let remove=btn('Quitar',()=>{if($('save').disabled)return;pendingImages=pendingImages.filter(x=>x!==p);globalThis.window.URL.revokeObjectURL(p.url);drawPending();imageNotice(pendingImages.length+' imágenes nuevas seleccionadas.')},'secondary');add(card,im,el('small',p.file.name),remove);area.append(card)}}
 function queueImages(files){if($('save').disabled||$('editor').hidden)return;let errors=[];for(let file of files){if(!imageTypes.includes(file.type)||file.size>5*1024*1024||!file.size){errors.push('Imagen no válida o mayor a 5 MB: '+file.name);continue}if(pendingImages.length>=10){errors.push('Máximo 10 imágenes nuevas por guardado.');break}pendingImages.push({file,url:globalThis.URL.createObjectURL(file)})}drawPending();imageNotice(pendingImages.length+' imágenes nuevas seleccionadas.'+(errors.length?' '+errors.join(' '):''))}
 $('image').onchange=e=>{queueImages([...e.target.files]);e.target.value=''};
 $('pasteZone').addEventListener('paste',e=>{let files=[...(e.clipboardData?.items||[])].filter(i=>i.kind==='file'&&i.type.startsWith('image/')).map(i=>i.getAsFile()).filter(Boolean);if(!files.length){imageNotice('El portapapeles no contiene una imagen compatible.');return}e.preventDefault();queueImages(files)});
-function resetViewerImage(){if(viewerBlob)globalThis.URL.revokeObjectURL(viewerBlob);viewerBlob=null;$('viewerImage').removeAttribute('src');$('viewerImage').hidden=true;$('viewerDownload').disabled=true}
+function resetViewerImage(){if(viewerBlob)globalThis.window.URL.revokeObjectURL(viewerBlob);viewerBlob=null;$('viewerImage').removeAttribute('src');$('viewerImage').hidden=true;$('viewerDownload').disabled=true}
 async function showViewer(){let token=++viewerToken;resetViewerImage();let x=viewerEntry,paths=x?.images||[];if(!paths.length)return;let path=paths[viewerIndex];$('viewerTitle').textContent=codeTitle(x);$('viewerStatus').textContent='Imagen '+(viewerIndex+1)+' de '+paths.length+' · Cargando…';$('viewerPrev').disabled=viewerIndex===0;$('viewerNext').disabled=viewerIndex===paths.length-1;try{let {data,error}=await db.storage.from('private-images').download(path);if(error)throw error;if(token!==viewerToken||!$('imageDialog').open)return;viewerBlob=globalThis.URL.createObjectURL(data);$('viewerImage').src=viewerBlob;$('viewerImage').hidden=false;$('viewerDownload').disabled=false;$('viewerStatus').textContent='Imagen '+(viewerIndex+1)+' de '+paths.length}catch(e){if(token===viewerToken)$('viewerStatus').textContent='No se pudo cargar la imagen: '+(e.message||String(e))}}
 function openViewer(x,index){viewerEntry=x;viewerIndex=index;if(!$('imageDialog').open)$('imageDialog').showModal();showViewer()}
 $('viewerClose').onclick=()=>$('imageDialog').close();
@@ -621,10 +621,10 @@ $('imageDialog').addEventListener('close',()=>{viewerToken++;resetViewerImage();
 $('viewerPrev').onclick=()=>{if(viewerIndex>0){viewerIndex--;showViewer()}};
 $('viewerNext').onclick=()=>{if(viewerIndex<(viewerEntry?.images?.length||0)-1){viewerIndex++;showViewer()}};
 function downloadName(path,type){let ext=({'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif'})[type]||'bin';return 'bitacora-'+path.split('/').pop()+'.'+ext}
-async function downloadImage(path){try{let {data,error}=await db.storage.from('private-images').download(path);if(error)throw error;let url=globalThis.URL.createObjectURL(data),a=el('a');a.href=url;a.download=downloadName(path,data.type);document.body.append(a);a.click();a.remove();setTimeout(()=>globalThis.URL.revokeObjectURL(url),1000)}catch(e){fail(e)}}
+async function downloadImage(path){try{let {data,error}=await db.storage.from('private-images').download(path);if(error)throw error;let url=globalThis.URL.createObjectURL(data),a=el('a');a.href=url;a.download=downloadName(path,data.type);document.body.append(a);a.click();a.remove();setTimeout(()=>globalThis.window.URL.revokeObjectURL(url),1000)}catch(e){fail(e)}}
 $('viewerDownload').onclick=()=>{if(viewerEntry)downloadImage(viewerEntry.images[viewerIndex])};
 async function removeImage(x,path){if(mediaBusy||$('save').disabled||!$('editor').hidden||advanceBusy){alert('Cierra el formulario de edición antes de eliminar imágenes.');return}if(!confirm('¿Eliminar únicamente esta imagen del registro? Esta acción no se puede deshacer.'))return;mediaBusy=true;try{let next=x.images.filter(p=>p!==path);let digital_resources=digitalList(x).map(d=>d.image_path===path?{...d,image_path:''}:d);let {data,error}=await db.from('entries').update({images:next,digital_resources}).eq('id',x.id).eq('updated_at',x.updated_at).select('id');if(error)throw error;if(!data?.length)throw Error('El registro cambió. Actualiza la página antes de eliminar imágenes.');let removed=await db.storage.from('private-images').remove([path]);await load();if(removed.error){fail(Error('Imagen desvinculada, pero no se pudo borrar el archivo privado: '+removed.error.message));return}msg('🟢 OK — Imagen eliminada correctamente.',true)}catch(e){fail(e)}finally{mediaBusy=false}}
-let thumbnailUrls=[];function clearThumbnails(){for(const url of thumbnailUrls)globalThis.URL.revokeObjectURL(url);thumbnailUrls=[]}
+let thumbnailUrls=[];function clearThumbnails(){for(const url of thumbnailUrls)globalThis.window.URL.revokeObjectURL(url);thumbnailUrls=[]}
 function renderGallery(a,x,stamp){let paths=x.images||[];if(!paths.length)return;let section=el('div',null,'related'),gallery=el('div',null,'gallery-grid');add(section,el('strong','Recursos visuales ('+paths.length+')'),gallery);a.append(section);paths.forEach((path,index)=>{let card=el('div',null,'gallery-item'),linked=digitalList(x).find(d=>d.image_path===path&&safeLink(d.url)),linkedUrl=linked?safeLink(linked.url):null,preview=btn('',()=>linkedUrl?window.open(linkedUrl,'_blank','noopener,noreferrer'):openViewer(x,index),'preview'),actions=el('div',null,'gallery-actions');preview.setAttribute('aria-label',linkedUrl?'Abrir enlace de '+linked.title:'Ampliar imagen '+(index+1));preview.title=linkedUrl?'Abrir '+linked.title+' en otra pestaña':'Ampliar imagen';preview.append(el('small','Cargando imagen…'));add(actions,btn('Ampliar',()=>openViewer(x,index),'secondary'),btn('Descargar',()=>downloadImage(path),'secondary'),btn('Eliminar',()=>removeImage(x,path),'danger'));add(card,preview,el('small','Imagen '+(index+1)+(linkedUrl?' · 🔗 '+linked.title:'')),actions);gallery.append(card);db.storage.from('private-images').download(path).then(({data,error})=>{if(stamp!==epoch)return;if(error||!data){preview.replaceChildren(el('small','Vista previa no disponible'));return}let url=globalThis.URL.createObjectURL(data);thumbnailUrls.push(url);let im=el('img');im.src=url;im.alt='Imagen adjunta '+(index+1);im.loading='lazy';im.onerror=()=>preview.replaceChildren(el('small','Abrir imagen'));preview.replaceChildren(im)}).catch(()=>{if(stamp===epoch)preview.replaceChildren(el('small','Vista previa no disponible'))})})}
 
 let convertBusy=false;
@@ -643,7 +643,7 @@ async function convertIdea(x){
 }
 function edit(x){if($('save').disabled||mediaBusy||convertBusy)return;clearPending();editing=x||null;f.reset();f.elements.kind.disabled=!!x;$('kindNote').textContent=x?'El tipo se conserva. Usa Convertir en proyecto para transformar una idea.':'';$('parents').replaceChildren(new Option('Sin proyecto',''),...items.filter(i=>i.kind==='Proyecto'&&i.id!==x?.id).map(i=>new Option(codeTitle(i),i.id)));if(x)for(let k of ['kind','title','description','parent_id','status','priority','progress','due','last_step','next_step','links'])f.elements[k].value=x[k]??'';else if(['Proyecto','Idea','Pendiente'].includes(tab))f.elements.kind.value=tab;$('editor').hidden=false;$('editorTitle').textContent=x?'Editar registro':'Nuevo registro';$('recordCodeHint').textContent=x?.record_code?'Código actual: '+x.record_code+(x.origin_code?' · Origen: '+x.origin_code:''):'Código asignado automáticamente al guardar';$('save').textContent=x?'✓ Guardar cambios':'✓ Guardar registro';$('editor').scrollIntoView({behavior:'smooth'})}
 $('new').onclick=()=>edit();$('cancel').onclick=()=>{if($('save').disabled)return;clearPending();$('editor').hidden=true;editing=null};$('search').oninput=()=>{quickId=null;render()};f.onsubmit=async e=>{e.preventDefault();if($('save').disabled||mediaBusy||convertBusy)return;$('save').disabled=true;$('cancel').disabled=true;$('image').disabled=true;let uploaded=[],saved=false;const original=editing,owner=user?.id,files=pendingImages.map(p=>p.file);try{if(!owner)throw Error('Inicia sesión nuevamente.');let v=Object.fromEntries(new FormData(f));if(original)v.kind=original.kind;v.progress=Number(v.progress);v.due=v.due||null;v.parent_id=v.parent_id||null;v.owner=owner;v.images=[...(original?.images||[])];v.history=[...(original?.history||[])];if(v.last_step&&v.last_step!==original?.last_step)v.history.push({date:new Date().toISOString(),text:v.last_step});for(let file of files){if(user?.id!==owner)throw Error('La sesión cambió.');let path=owner+'/'+crypto.randomUUID();let {error}=await db.storage.from('private-images').upload(path,file,{contentType:file.type});if(error)throw error;uploaded.push(path);v.images.push(path)}if(user?.id!==owner)throw Error('La sesión cambió.');let result=original?await db.from('entries').update(v).eq('id',original.id).eq('updated_at',original.updated_at).select('id'):await db.from('entries').insert(v).select('id');if(result.error)throw result.error;if(!result.data?.length)throw Error('El registro cambió o no se pudo guardar.');saved=true;clearPending();$('editor').hidden=true;editing=null;await load();msg('🟢 OK — Registro guardado correctamente.',true)}catch(err){if(!saved&&uploaded.length&&user?.id===owner){try{await db.storage.from('private-images').remove(uploaded)}catch{}}fail(err)}finally{$('save').disabled=false;$('cancel').disabled=false;$('image').disabled=false}};
-$('backup').onclick=()=>{let url=globalThis.URL.createObjectURL(new Blob([JSON.stringify(items,null,2)],{type:'application/json'}));let a=el('a');a.href=url;a.download='bitacora-'+new Date().toISOString().slice(0,10)+'.json';a.click();globalThis.URL.revokeObjectURL(url)};
+$('backup').onclick=()=>{let url=globalThis.URL.createObjectURL(new Blob([JSON.stringify(items,null,2)],{type:'application/json'}));let a=el('a');a.href=url;a.download='bitacora-'+new Date().toISOString().slice(0,10)+'.json';a.click();globalThis.window.URL.revokeObjectURL(url)};
 
 const encoder=new TextEncoder();
 const crcTable=Uint32Array.from({length:256},(_,i)=>{let c=i;for(let k=0;k<8;k++)c=(c&1)?0xedb88320^(c>>>1):c>>>1;return c>>>0});
@@ -662,7 +662,7 @@ function makeZip(files){
 }
 let backupBusy=false;
 function jsonBytes(x){return encoder.encode(JSON.stringify(x,null,2))}
-function saveBackupBlob(blob,name){let url=globalThis.URL.createObjectURL(blob),a=el('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>globalThis.URL.revokeObjectURL(url),30000)}
+function saveBackupBlob(blob,name){let url=globalThis.URL.createObjectURL(blob),a=el('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>globalThis.window.URL.revokeObjectURL(url),30000)}
 $('backupZip').onclick=()=>{if(!user||backupBusy)return;$('backupStatus').textContent='Listo para respaldar registros, imágenes y documentos, sin aplicar filtros.';$('backupProgress').value=0;$('backupDialog').showModal()};
 $('backupClose').onclick=()=>{if(!backupBusy)$('backupDialog').close()};
 $('backupDialog').addEventListener('cancel',e=>{if(backupBusy)e.preventDefault()});
@@ -915,8 +915,8 @@ async function getDoc(d,preview){
  try{
  const {data,error}=await db.storage.from('private-resources').download(d.file_path);if(error)throw error;if(user?.id!==owner)throw Error('La sesión cambió.');
  const url=globalThis.URL.createObjectURL(new Blob([data],{type:d.mime_type}));
- if(win){win.opener=null;win.location.href=url;setTimeout(()=>globalThis.URL.revokeObjectURL(url),300000)}
- else{const a=el('a');a.href=url;a.download=d.file_name;document.body.append(a);a.click();a.remove();setTimeout(()=>globalThis.URL.revokeObjectURL(url),30000)}
+ if(win){win.opener=null;win.location.href=url;setTimeout(()=>globalThis.window.URL.revokeObjectURL(url),300000)}
+ else{const a=el('a');a.href=url;a.download=d.file_name;document.body.append(a);a.click();a.remove();setTimeout(()=>globalThis.window.URL.revokeObjectURL(url),30000)}
  }catch(e){if(win)win.close();fail(e)}
 }
 async function deleteDoc(d){
