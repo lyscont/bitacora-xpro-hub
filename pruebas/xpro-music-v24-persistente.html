@@ -1,0 +1,252 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>XPRO Music Studio V2.4 — Biblioteca personal</title><style>
+body{font-family:system-ui,-apple-system,sans-serif;margin:0;background:#eef3f8;color:#18334a;padding:20px}
+main{max-width:650px;margin:20px auto;background:white;border:1px solid #dce4ed;border-radius:16px;padding:25px;box-shadow:0 10px 28px #0001}
+h1{font-size:1.4rem}h2{font-size:1.2rem}label{display:block;margin:15px 0;font-weight:650}
+select,input[type=range],input[type=file]{display:block;width:100%;margin-top:8px;box-sizing:border-box}
+button{background:#176b51;color:white;border:0;border-radius:9px;padding:10px 14px;cursor:pointer;margin:4px;font-weight:650}
+.secondary{background:#e8eff5;color:#19394f}.muted{color:#536a7e}.dash-actions{display:flex;flex-wrap:wrap}dialog{position:static;border:0;margin:0;padding:0;max-width:100%}#musicStatus,#musicTrackStatus{padding:9px;background:#edf7f2;border-radius:7px}#musicPlaylist{min-height:110px}
+</style></head><body><main><h1>🎵 XPRO Music Studio V2.4 — Biblioteca personal</h1><p><strong>Prueba aislada:</strong> sin inicio de sesión, Supabase ni acceso a los proyectos de Bitácora.</p>
+<button id="musicOpen">🎵 Música</button>
+<dialog id="musicDialog" open><h2>Ambientes originales</h2>
+<label>Ambiente musical<select id="musicStyle"><option value="calma">Calma</option><option value="foco">Concentración</option></select></label>
+<label>Volumen <output id="musicVolumeLabel">50%</output><input type="range" id="musicVolume" min="0" max="100" value="50"></label>
+<div class="dash-actions"><button id="musicToggle">▶ Reproducir</button><button id="musicStop" class="secondary">■ Detener música</button><button id="musicClose" class="secondary">Cerrar panel</button></div><p id="musicStatus" role="status"></p>
+<hr><h2>🎻 Biblioteca clásica</h2>
+<p class="muted">Obras de dominio público. Selecciona una grabación MP3 propia o autorizada para reproducir.</p>
+<label>Obra<select id="classicalWork"><option value="vivaldi">Vivaldi — Las cuatro estaciones</option><option value="bach">Bach — Preludio en do mayor, BWV 846</option><option value="mozart">Mozart — Eine kleine Nachtmusik, K. 525</option></select></label>
+<button id="classicalStream">▶ Escuchar obra en línea</button><button id="classicalChoose" class="secondary">Elegir MP3 para esta obra</button><p id="classicalCredit" class="muted">Créditos de grabación y licencia.</p><input id="classicalFile" type="file" accept="audio/mpeg,.mp3" hidden>
+<hr><h2>🎧 Mis MP3</h2><input id="musicFiles" type="file" accept="audio/mpeg,.mp3" multiple>
+<label>Lista de reproducción<select id="musicPlaylist" size="5"></select></label>
+<div class="dash-actions"><button id="musicTrackPlay">▶ Escuchar selección</button><button id="musicTrackNext" class="secondary">⏭ Siguiente</button><button id="musicTrackRemove" class="secondary">Quitar pista</button></div><p id="musicTrackStatus" role="status"></p>
+<p class="muted">Tus MP3 se guardan en IndexedDB en este navegador. Al volver a abrir la página deberían aparecer de nuevo. No se suben a ningún servidor. Al borrar los datos del sitio se pueden perder.</p>
+</dialog></main>
+<script>
+const $=id=>document.getElementById(id);
+const musicPrefsKey='xpro-ambient-music-v1';
+let musicPrefs={style:'calma',volume:50},musicPlaying=false,musicAudio=null,musicMaster=null,musicTimer=null,musicStep=0,musicNextTime=0,musicVoices=new Set(),musicRun=0;
+try{const p=JSON.parse(localStorage.getItem(musicPrefsKey)||'null');if(p&&['calma','foco'].includes(p.style)&&Number.isFinite(p.volume))musicPrefs={style:p.style,volume:Math.max(0,Math.min(100,Math.round(p.volume)))}}catch{}
+function musicSave(){try{localStorage.setItem(musicPrefsKey,JSON.stringify(musicPrefs))}catch{}}
+function musicUpdateUI(message){
+ $('musicStyle').value=musicPrefs.style;
+ $('musicVolume').value=String(musicPrefs.volume);
+ $('musicVolumeLabel').textContent=musicPrefs.volume+'%';
+ $('musicToggle').textContent=musicPlaying?'❚❚ Pausar':'▶ Reproducir';
+ $('musicOpen').textContent=musicPlaying?'🎵 Música · Activa':'🎵 Música';
+ $('musicStatus').textContent=message||(musicPlaying?'✓ Reproduciendo · '+(musicPrefs.style==='calma'?'Calma':'Concentración')+' · Volumen '+musicPrefs.volume+'%':'Música en pausa. Pulsa Reproducir para iniciar.');
+}
+function musicNote(freq,start,duration,level){
+ const osc=musicAudio.createOscillator(),env=musicAudio.createGain();
+ osc.type='sine';osc.frequency.value=freq;
+ env.gain.setValueAtTime(0,start);
+ env.gain.linearRampToValueAtTime(level,start+.08);
+ env.gain.setValueAtTime(level,start+Math.max(.1,duration-.4));
+ env.gain.exponentialRampToValueAtTime(.0001,start+duration);
+ osc.connect(env);env.connect(musicMaster);musicVoices.add(osc);osc.onended=()=>{musicVoices.delete(osc);try{osc.disconnect();env.disconnect()}catch{}};osc.start(start);osc.stop(start+duration+.02);
+}
+function musicSchedule(){
+ if(!musicPlaying||!musicAudio||musicAudio.state!=='running')return;
+ const now=musicAudio.currentTime;
+ if(musicNextTime<now)musicNextTime=now+.06;
+ while(musicNextTime<now+15){
+  const seq=musicPrefs.style==='calma'?[220,261.63,329.63,293.66,246.94,196,246.94,261.63]:[174.61,220,261.63,220,196,246.94,293.66,246.94];
+  musicNote(seq[musicStep%seq.length],musicNextTime,2.6,.22);
+  if(musicStep%2===0)musicNote(musicPrefs.style==='calma'?130.81:110,musicNextTime,4.8,.075);
+  musicNextTime+=2.5;musicStep++;
+ }
+}
+async function musicStart(){
+ if(musicPlaying)return;
+ musicStopMp3();
+ const run=++musicRun;
+ musicUpdateUI('Iniciando audio…');
+ try{
+  const A=window.AudioContext||window.webkitAudioContext;
+  if(!A)throw Error('AudioContext no disponible');
+  if(!musicAudio)musicAudio=new A();
+  if(musicAudio.state!=='running')await musicAudio.resume();
+  if(run!==musicRun)return; // Si se pulsó Detener durante el inicio, no reactivar.
+  if(musicAudio.state!=='running')throw Error('El navegador bloqueó el audio: '+musicAudio.state);
+  musicMaster=musicAudio.createGain();
+  musicMaster.connect(musicAudio.destination);
+  musicMaster.gain.setValueAtTime(0,musicAudio.currentTime);
+  musicMaster.gain.setTargetAtTime(musicPrefs.volume/100*.65,musicAudio.currentTime,.03);
+  musicPlaying=true;musicStep=0;musicNextTime=musicAudio.currentTime+.08;
+  musicSchedule();
+  if(musicTimer!==null)clearInterval(musicTimer);
+  musicTimer=setInterval(musicSchedule,500);
+  musicUpdateUI();
+ }catch(e){if(run===musicRun){musicPlaying=false;musicUpdateUI('Error de audio: '+(e?.message||String(e)))}}
+}
+function musicStop(){
+ ++musicRun;musicPlaying=false;
+ if(musicTimer!==null)clearInterval(musicTimer);
+ musicTimer=null;
+ if(musicAudio){
+  const now=musicAudio.currentTime;
+  if(musicMaster){
+   musicMaster.gain.cancelScheduledValues(now);
+   musicMaster.gain.setValueAtTime(0,now);
+   try{musicMaster.disconnect()}catch{}
+   musicMaster=null;
+  }
+  for(const osc of musicVoices){try{osc.stop(now)}catch{}}
+  musicVoices.clear();
+ }
+ musicUpdateUI('■ Música detenida. Pulsa Reproducir para iniciarla.');
+}
+$('musicOpen').onclick=()=>{musicUpdateUI();$('musicDialog').showModal()};
+$('musicClose').onclick=()=>{$('musicDialog').close()};
+$('musicStop').onclick=()=>{musicStop();musicStopMp3();musicTrackUI('■ Toda la música detenida.')};
+$('musicToggle').onclick=()=>musicPlaying?musicStop():musicStart();
+$('musicStyle').onchange=()=>{musicPrefs.style=$('musicStyle').value;musicSave();if(musicPlaying){musicStop();musicStart()}else musicUpdateUI()};
+$('musicVolume').oninput=()=>{musicPrefs.volume=Number($('musicVolume').value);musicSave();if(musicMaster&&musicAudio)musicMaster.gain.setTargetAtTime(musicPlaying?musicPrefs.volume/100*.65:0,musicAudio.currentTime,.04);musicUpdateUI()};
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&musicPlaying){if(musicAudio?.state==='suspended')musicAudio.resume().then(musicSchedule).catch(e=>musicUpdateUI('Reanudación bloqueada: '+e.message));else musicSchedule()}});
+// V2.4: biblioteca MP3 privada y persistente en IndexedDB (mismo navegador y dispositivo).
+const musicDbName='xpro-music-local-v24',musicStore='tracks';
+function musicDbOpen(){
+ return new Promise((resolve,reject)=>{
+  if(!('indexedDB' in window))return reject(Error('El navegador no admite almacenamiento local IndexedDB.'));
+  const req=indexedDB.open(musicDbName,1);
+  req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(musicStore))req.result.createObjectStore(musicStore,{keyPath:'id'})};
+  req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error||Error('No se pudo abrir la biblioteca local.'));
+ });
+}
+async function musicDbSave(id,title,blob){
+ const db=await musicDbOpen();
+ try{await new Promise((resolve,reject)=>{
+  const tx=db.transaction(musicStore,'readwrite');
+  tx.objectStore(musicStore).put({id,title,blob,created:Date.now()});
+  tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||Error('No se pudo guardar el MP3.'));tx.onabort=()=>reject(tx.error||Error('Guardado cancelado.'));
+ })}finally{db.close()}
+}
+async function musicDbDelete(id){
+ const db=await musicDbOpen();
+ try{await new Promise((resolve,reject)=>{
+  const tx=db.transaction(musicStore,'readwrite');tx.objectStore(musicStore).delete(id);
+  tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error||Error('No se pudo quitar el MP3.'));
+ })}finally{db.close()}
+}
+async function musicDbLoad(){
+ const db=await musicDbOpen();
+ try{return await new Promise((resolve,reject)=>{
+  const tx=db.transaction(musicStore,'readonly'),request=tx.objectStore(musicStore).getAll();
+  request.onsuccess=()=>resolve(request.result||[]);
+  request.onerror=()=>reject(request.error||Error('No se pudo recuperar la biblioteca.'));
+ })}finally{db.close()}
+}
+async function musicRestoreSaved(){
+ try{
+  const stored=await musicDbLoad();
+  for(const item of stored){
+   if(musicTracks.some(t=>t.id===item.id))continue;
+   const url=window.URL.createObjectURL(item.blob);
+   musicTrackURLs.add(url);
+   musicTracks.push({id:item.id,title:item.title,url,persisted:true});
+  }
+  musicTrackUI(stored.length?'✓ Biblioteca personal recuperada: '+stored.length+' MP3 guardados.':'Biblioteca personal lista. Agrega tus MP3 para conservarlos.');
+ }catch(e){musicTrackUI('Almacenamiento local no disponible: '+(e?.message||String(e)))}
+}
+const musicTracks=[],musicTrackURLs=new Set();
+let musicTrackIndex=-1;
+const musicPlayer=new Audio();
+musicPlayer.preload='metadata';
+musicPlayer.volume=musicPrefs.volume/100;
+function musicTrackUI(message){
+ const selector=$('musicPlaylist'),selected=selector.value;
+ selector.replaceChildren();
+ musicTracks.forEach((track,i)=>{
+  const option=document.createElement('option');
+  option.value=String(i);option.textContent=(i===musicTrackIndex?'♫ ':'')+track.title;
+  selector.append(option);
+ });
+ if(musicTracks.length){selector.value=musicTrackIndex>=0?String(musicTrackIndex):selected;if(selector.selectedIndex<0)selector.selectedIndex=0}
+ $('musicTrackStatus').textContent=message||(musicTracks.length?musicTracks.length+' MP3 disponibles · '+(musicPlayer.paused?'Pausado':'Reproduciendo'):'Sin MP3 cargados.');
+ $('musicTrackPlay').textContent=musicPlayer.paused?'▶ Escuchar selección':'❚❚ Pausar MP3';
+}
+function musicStopMp3(){
+ musicPlayer.pause();
+ musicPlayer.currentTime=0;
+ musicTrackUI('MP3 detenido.');
+}
+async function musicPlayTrack(index){
+ if(!Number.isInteger(index)||index<0||index>=musicTracks.length)return;
+ if(musicPlaying)musicStop();
+ musicPlayer.pause();musicTrackIndex=index;
+ musicPlayer.src=musicTracks[index].url;
+ musicPlayer.volume=musicPrefs.volume/100;
+ try{await musicPlayer.play();musicTrackUI('♫ Reproduciendo: '+musicTracks[index].title)}
+ catch(e){musicTrackUI('No se pudo reproducir la pista. Verifica tu conexión, el audio o la disponibilidad en Wikimedia Commons. '+(e?.message||String(e)))}
+}
+async function musicAddFiles(files,prefix=''){
+ let added=0,errors=[];
+ for(const file of Array.from(files||[])){
+  if(!/\\.mp3$/i.test(file.name)&&file.type!=='audio/mpeg')continue;
+  if(file.size===0||file.size>70*1024*1024){errors.push(file.name+' supera el límite de 70 MB o está vacío.');continue}
+  const id=crypto.randomUUID(),title=prefix?prefix+' · '+file.name:file.name;
+  try{
+   await musicDbSave(id,title,file);
+   const url=window.URL.createObjectURL(file);
+   musicTrackURLs.add(url);musicTracks.push({id,title,url,persisted:true});
+   added++;
+  }catch(e){errors.push(file.name+': '+(e?.message||String(e)))}
+ }
+ musicTrackUI(added?'✓ '+added+' MP3 guardados permanentemente en este navegador.':errors.length?'No se pudieron guardar MP3.':'Selecciona archivos MP3 válidos.');
+ if(errors.length)$('musicTrackStatus').textContent+=' '+errors.join(' ');
+}
+$('musicFiles').addEventListener('change',e=>{musicAddFiles(e.target.files);e.target.value=''});
+$('classicalChoose').onclick=()=>$('classicalFile').click();
+$('classicalFile').addEventListener('change',e=>{
+ const names={vivaldi:'Vivaldi — Las cuatro estaciones',bach:'Bach — Preludio BWV 846',mozart:'Mozart — Eine kleine Nachtmusik'};
+ musicAddFiles(e.target.files,names[$('classicalWork').value]||'Clásico');e.target.value='';
+});
+$('musicTrackPlay').onclick=()=>{
+ if(!musicPlayer.paused){musicPlayer.pause();musicTrackUI('MP3 pausado.');return}
+ const choice=Number($('musicPlaylist').value);
+ const index=Number.isInteger(choice)&&choice>=0&&choice<musicTracks.length?choice:musicTrackIndex;
+ if(index>=0&&index<musicTracks.length){
+  if(musicPlayer.src===musicTracks[index].url){musicPlayer.play().then(()=>musicTrackUI()).catch(e=>musicTrackUI('No se pudo iniciar: '+e.message))}
+  else musicPlayTrack(index);
+ }
+};
+$('musicPlaylist').onchange=()=>{const i=Number($('musicPlaylist').value);if(Number.isInteger(i)&&i>=0&&i<musicTracks.length)musicPlayTrack(i)};
+$('musicTrackNext').onclick=()=>{if(musicTracks.length)musicPlayTrack((musicTrackIndex+1)%musicTracks.length)};
+$('musicTrackRemove').onclick=()=>{
+ const selected=Number($('musicPlaylist').value);
+ if(!Number.isInteger(selected)||selected<0||selected>=musicTracks.length)return;
+ if(selected===musicTrackIndex)musicStopMp3();
+ const [removed]=musicTracks.splice(selected,1);
+ if(removed&&!removed.remote){window.URL.revokeObjectURL(removed.url);musicTrackURLs.delete(removed.url)}
+ if(removed?.persisted){musicDbDelete(removed.id).catch(e=>musicTrackUI('Pista quitada de la lista, pero falló su borrado local: '+e.message))}
+ musicTrackIndex=-1;musicTrackUI();
+};
+musicPlayer.addEventListener('ended',()=>{if(musicTracks.length)musicPlayTrack((musicTrackIndex+1)%musicTracks.length)});
+musicPlayer.addEventListener('pause',()=>musicTrackUI());
+musicPlayer.addEventListener('play',()=>musicTrackUI());
+$('musicVolume').addEventListener('input',()=>{musicPlayer.volume=Number($('musicVolume').value)/100});
+window.addEventListener('pagehide',()=>{musicPlayer.pause();for(const url of musicTrackURLs)window.URL.revokeObjectURL(url)});
+const xproClassicalRecordings={
+ vivaldi:{title:'Vivaldi — Primavera, I. Allegro',artist:'John Harrison, violín · Wichita State University Chamber Players · Robert Turizziani, director',license:'CC BY-SA 4.0',url:'https://upload.wikimedia.org/wikipedia/commons/f/ff/Vivaldi_-_Four_Seasons_1_Spring_mvt_1_Allegro_-_John_Harrison_violin.oga',source:'https://commons.wikimedia.org/wiki/File:Vivaldi_-_Four_Seasons_1_Spring_mvt_1_Allegro_-_John_Harrison_violin.oga'},
+ bach:{title:'Bach — Preludio en do mayor, BWV 846',artist:'Kimiko Ishizaka, piano',license:'CC0 1.0',url:'https://upload.wikimedia.org/wikipedia/commons/b/b6/Kimiko_Ishizaka_-_Bach_-_Well-Tempered_Clavier%2C_Book_1_-_01_Prelude_No._1_in_C_major%2C_BWV_846.ogg',source:'https://commons.wikimedia.org/wiki/File:Kimiko_Ishizaka_-_Bach_-_Well-Tempered_Clavier,_Book_1_-_01_Prelude_No._1_in_C_major,_BWV_846.ogg'},
+ mozart:{title:'Mozart — Eine kleine Nachtmusik, I. Allegro',artist:'Advent Chamber Orchestra · Roxanna Pavel Goldstein, dirección',license:'CC BY-SA 2.0',url:'https://upload.wikimedia.org/wikipedia/commons/2/24/Mozart_-_Eine_kleine_Nachtmusik_-_1._Allegro.ogg',source:'https://commons.wikimedia.org/wiki/File:Mozart_-_Eine_kleine_Nachtmusik_-_1._Allegro.ogg'}
+};
+function musicPlayClassical(){
+ const rec=xproClassicalRecordings[$('classicalWork').value];if(!rec)return;
+ let index=musicTracks.findIndex(t=>t.url===rec.url);
+ if(index<0){musicTracks.push({title:rec.title,url:rec.url,remote:true});index=musicTracks.length-1}
+ musicPlayTrack(index);
+ musicShowCredit();
+}
+function musicShowCredit(){
+ const rec=xproClassicalRecordings[$('classicalWork').value];
+ const area=$('classicalCredit');area.replaceChildren();
+ if(!rec)return;
+ area.append(document.createTextNode(rec.artist+' · Licencia '+rec.license+' · '));
+ const a=document.createElement('a');a.href=rec.source;a.textContent='Fuente y condiciones';a.target='_blank';a.rel='noopener noreferrer';area.append(a);
+}
+$('classicalStream').onclick=musicPlayClassical;
+$('classicalWork').onchange=musicShowCredit;
+musicShowCredit();
+musicTrackUI();
+musicRestoreSaved();
+musicUpdateUI();
+</script></body></html>
