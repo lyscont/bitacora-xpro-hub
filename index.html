@@ -294,7 +294,7 @@ body.dash-print{background:white!important;color:#18334a;font-size:11px}
 #musicDialog .music-section .dash-actions button{margin:0}
 #musicDialog #musicStatus,#musicDialog #musicTrackStatus{background:#e7f5ee;border:1px solid #cfe7da;border-radius:8px;padding:10px 12px;overflow-wrap:anywhere}
 #musicDialog #musicPlaylist{min-height:135px}
-/* V2.6.1 — Minirreproductor centrado dentro de la cabecera lila */
+/* V2.6.1 — Minirreproductor centrado dentro de la cabecera lila. Revision visual 3 */
 header{position:relative}
 #musicMini{position:absolute;top:8px;left:50%;transform:translateX(-50%);z-index:1000;width:min(480px,calc(100vw - 40px));min-height:96px;border:1px solid #bcd5cb;border-radius:16px;padding:12px 16px;background:#fff;color:#18334a;box-shadow:0 10px 28px #10243a35;font-size:13px}
 #musicMini[hidden]{display:none!important}
@@ -308,11 +308,11 @@ header{position:relative}
 #musicMini .mini-open{margin-left:auto}
 /* En pantallas medianas se reserva una segunda fila lila para evitar solapamientos. */
 @media(max-width:1250px){
- header:has(#musicMini:not([hidden])){padding-bottom:145px}
+ header.music-mini-visible{padding-bottom:145px}
  #musicMini{top:auto;bottom:12px;left:50%;right:auto;transform:translateX(-50%);width:min(480px,calc(100vw - 32px))}
 }
 @media(max-width:600px){
- header:has(#musicMini:not([hidden])){padding-bottom:155px}
+ header.music-mini-visible{padding-bottom:155px}
  #musicMini{width:calc(100vw - 24px);padding:11px 13px}
 }
 /* V2.5.1 — Progreso y controles de reproducción */
@@ -543,6 +543,7 @@ function musicMiniRender(){
   musicPrefs.style==='calma'?'Ambiente · Calma':'Ambiente · Concentración';
  const duration=musicPlayer.duration;
  $('musicMini').hidden=!musicMiniAvailable||musicMiniDismissed;
+ document.querySelector('header').classList.toggle('music-mini-visible',!$('musicMini').hidden);
  $('musicMiniTrack').textContent=title;
  $('musicMiniTime').textContent=musicMiniMode==='mp3'&&currentTrack?
   musicClock(musicPlayer.currentTime)+' / '+(Number.isFinite(duration)?musicClock(duration):'0:00'):
