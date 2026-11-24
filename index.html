@@ -306,8 +306,15 @@ header{position:relative}
 #musicMini button{font-size:12px;padding:7px 10px;margin:0}
 #musicMiniClose{background:#edf2f6!important;color:#18334a!important}
 #musicMini .mini-open{margin-left:auto}
-@media(max-width:1250px){#musicMini{position:fixed;top:auto;left:auto;right:16px;bottom:16px;transform:none;width:min(420px,calc(100vw - 32px))}}
-@media(max-width:600px){#musicMini{right:12px;bottom:12px;width:min(400px,calc(100vw - 24px));padding:11px 13px}}
+/* En pantallas medianas se reserva una segunda fila lila para evitar solapamientos. */
+@media(max-width:1250px){
+ header:has(#musicMini:not([hidden])){padding-bottom:145px}
+ #musicMini{top:auto;bottom:12px;left:50%;right:auto;transform:translateX(-50%);width:min(480px,calc(100vw - 32px))}
+}
+@media(max-width:600px){
+ header:has(#musicMini:not([hidden])){padding-bottom:155px}
+ #musicMini{width:calc(100vw - 24px);padding:11px 13px}
+}
 /* V2.5.1 — Progreso y controles de reproducción */
 #musicDialog .music-now-playing{padding:16px 18px;margin:18px 0 10px;border:1px solid #bcd9e3;border-radius:12px;background:#eef7fb}
 #musicDialog .music-now-head{display:flex;flex-direction:column;gap:5px;min-width:0}
@@ -451,9 +458,9 @@ function musicStop(){
  }
  musicUpdateUI('■ Música detenida. Pulsa Reproducir para iniciarla.');
 }
-$('musicOpen').onclick=()=>{musicUpdateUI();$('musicDialog').showModal()};
-$('musicClose').onclick=()=>{$('musicDialog').close()};
-$('musicCloseBottom').onclick=()=>{$('musicDialog').close()};
+$('musicOpen').onclick=()=>{musicMiniAvailable=true;musicMiniDismissed=false;musicUpdateUI();$('musicDialog').showModal()};
+$('musicClose').onclick=()=>{$('musicDialog').close();musicMiniRender()};
+$('musicCloseBottom').onclick=()=>{$('musicDialog').close();musicMiniRender()};
 $('musicStop').onclick=()=>{musicStop();musicStopMp3();musicTrackUI('■ Toda la música detenida.')};
 $('musicToggle').onclick=()=>musicPlaying?musicStop():musicStart();
 $('musicStyle').onchange=()=>{musicPrefs.style=$('musicStyle').value;musicSave();if(musicPlaying){musicStop();musicStart()}else musicUpdateUI()};
@@ -528,7 +535,7 @@ let musicTrackIndex=-1;
 const musicPlayer=new Audio();
 musicPlayer.preload='metadata';
 musicPlayer.volume=musicPrefs.volume/100;
-let musicMiniMode='ambient',musicMiniDismissed=false,musicMiniAvailable=false;
+let musicMiniMode='ambient',musicMiniDismissed=false,musicMiniAvailable=true;
 function musicMiniRender(){
  const playing=musicMiniMode==='ambient'?musicPlaying:!musicPlayer.paused;
  const currentTrack=musicTracks[musicTrackIndex];
@@ -671,7 +678,7 @@ $('musicTrackRemove').onclick=()=>{
  if(removed&&!removed.remote){window.URL.revokeObjectURL(removed.url);musicTrackURLs.delete(removed.url)}
  if(removed?.persisted){musicDbDelete(removed.id).catch(e=>musicTrackUI('Pista quitada de la lista, pero falló su borrado local: '+e.message))}
  if(removed){delete musicMeta[musicTrackKey(removed)];try{localStorage.setItem(musicMetaKey,JSON.stringify(musicMeta))}catch{}}
- musicTrackIndex=-1;if(!musicPlaying)musicMiniAvailable=false;musicTrackUI();
+ musicTrackIndex=-1;musicTrackUI();
 };
 musicPlayer.addEventListener('ended',()=>{if(musicTracks.length)musicPlayTrack((musicTrackIndex+1)%musicTracks.length)});
 musicPlayer.addEventListener('pause',()=>musicTrackUI());
